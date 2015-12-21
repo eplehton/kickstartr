@@ -1,0 +1,79 @@
+---
+title: "variable_types.R"
+output: html_document
+---
+
+Data frames
+==============================
+
+Data frames can be constructed by stacking vectors beside each other or on top of each other
+
+```{r}
+# First beside one another
+# Let's create a couple of vectors
+
+kek <- seq(1,20,2)
+kek
+kone <- runif(n = 10,min = 1,max=30)
+kone
+
+#kone is a vector of random uniformly distributed continuous values, picked from the range [1...30]
+
+kekkone <- cbind(kek,kone)
+kekkone
+
+#cbind is a short for "bind columns together", and that's what was done
+
+class(kekkone)
+# we created a matrix, which is a little different from a data frame
+# A matrix can usually be transformed into a data frame by saying:
+
+kekkone.df <- as.data.frame(kekkone)
+kekkone.df
+
+# A simple way to do the same thing in this case would be:
+
+data.frame(kek,kone)
+
+
+# If the values in the vectors were the values of ten different values, we could say:
+
+konekek <- rbind(kek,kone)
+konekek
+
+# rbind is short for "bind rows together", or stack them on top of one another
+
+konekek.df <- as.data.frame(konekek)
+konekek.df
+
+names(konekek.df) <- c("Openness", "Conscientciousness", "Extroversion","Agreeableness",
+                       "Neuroticism", paste("X",1:5,sep=""))
+names(konekek.df)
+konekek.df
+
+# Vectors can be combined by c (short for combine)
+longvector <- c(kek,kone)
+
+
+```
+
+Little heading
+--------------------------
+
+```{r}
+
+# There are also other conversion options, for instance from data frame to matrix
+
+as.matrix(kekkone.df)
+
+
+
+```
+
+You can also embed plots, for example:
+
+```{r, echo=FALSE}
+plot(cars)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
