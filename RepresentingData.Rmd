@@ -11,9 +11,10 @@ Vectors
 
 In R, the basic objects is vector. It is an ordered set of data containing one or more elements. 
 
-https://cran.r-project.org/doc/manuals/r-release/R-lang.html
-
 When you enter text to the R console, the interpreted will parse your input, and create a vector. The vectors "know" what kind of data they have in them.
+
+[R lang defitions: Vectors](https://cran.r-project.org/doc/manuals/r-release/R-lang.html#Vector-objects)
+
 
 ```{r}
 
@@ -67,6 +68,9 @@ Operators
 Objects represent data and variables can represent them in algorithms. In the previous example, we used multiplication which was represented as *. * is an operator. When an operator encounters objects (or variables which can represent them), new objects are created. 
 
 However, at first there is nothing that exciting if you remember anything about elementary school mathematics. 
+
+[R lang definition: Operators](https://cran.r-project.org/doc/manuals/r-release/R-lang.html#Operators)
+
 
 ```{r}
 # Let's create objects and assign them to variables.
@@ -285,9 +289,7 @@ Creating values conditionally
 Sometimes it's necessary to create new variables conditionally, conditioned on the values of
 other variables
 
-For instance, it may be interesting to know whether the mean of our Likert variables is above
-or below the middle value, 3 (value of exactly 3 is here treated arbitrarily as equal to
-the low values):
+For instance, we could be interested to calculate a new variables which describes weather a person has citations or not:
 
 ```{r}
 academics$hasCitations <- ifelse(academics$citations > 0, 1 ,0)
@@ -295,15 +297,33 @@ academics
 
 ```
 
+Comparative operators 
+--------------------------------
+
+In the above, we used comparator operator >. They can be used to compare things, and the results will be either TRUE or FALSE. 
+
+[Operators](https://cran.r-project.org/doc/manuals/r-release/R-lang.html#Operators)
+
+```{r}
+
+5 > 2   # is greater than
+5 < 2   # is smaller than
+5 == 2  # is equal to
+5 != 2  # is not equal to
+5 >= 5   # is greater or equal
+5 <= 5   # is smaller or equal 
+
+!(5 == 2)  # ! alone is negation
+
+```
 
 Calculating something based on non-missing values: a bit advanced stuff => reorganize
 ```{r}
 
+#rowMeans(mydata[,paste("q",1:4,sep="")],na.rm=TRUE)
 
-rowMeans(mydata[,paste("q",1:4,sep="")],na.rm=TRUE)
-
-mydata$mean.missing <- rowMeans(mydata[,paste("q",1:4,sep="")],na.rm=TRUE)
-mydata
+#mydata$mean.missing <- rowMeans(mydata[,paste("q",1:4,sep="")],na.rm=TRUE)
+#mydata
 
 
 ```
