@@ -1,0 +1,71 @@
+---
+title: "tutustu"
+author: "Markus"
+date: "22 Dec 2015"
+output: html_document
+---
+
+Getting to know your data
+============================
+
+Here we list some simple ways of getting acquainted with new data.
+
+Let's first list built-in datasets:
+
+```{r}
+data()
+```
+
+And then pick one of the datasets:
+```{r}
+data(attitude)
+```
+
+What variables are in there?
+
+```{r}
+names(attitude)
+```
+
+How large is the data?
+```{r}
+dim(attitude)
+```
+How does the data begin and end:
+```{r}
+head(attitude)
+tail(attitude)
+```
+View data:
+```{r}
+View(attitude)
+```
+
+Summarise data:
+
+```{r}
+summary(attitude)
+```
+
+For built-in daasets, there's also further info on them:
+
+```{r}
+?attitude
+```
+
+What are the variable types in our data?
+```{r}
+str(attitude)
+```
+
+OK, the variables are all percentages, stored in numerical form - so we can use boxplots easily
+
+```{r}
+boxplot(attitude)
+```
+
+A scatterplot matrix is also very easy to produce:
+```{r}
+plot(attitude)
+```
+
