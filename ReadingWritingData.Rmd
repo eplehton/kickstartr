@@ -1,0 +1,173 @@
+---
+title: "Reading and writing data"
+output: html_document
+---
+
+
+This is partly based an excellent tutorial [R for SAS and SPSS users](https://science.nature.nps.gov/im/datamgmt/statistics/r/documents/r_for_sas_spss_users.pdf)
+
+
+Let's start with a simple example...
+
+We have a dataset in a text file. The variables are separated with tabs (empty space). Variables names are on the first row. 
+
+```{r}
+
+apgar <- read.table("apgar.txt")
+head(apgar) # we used to preview only the start or head of the data frame
+
+```
+That was not complicated! However, there are a couple things you need to pay attention to. 
+
+*Working directory*
+
+The filenames is resolved relative to the current working directory of your R console. If the file is in the working directory it can be found with the filename. If not, you either need to copy the file to your working directory or give also the path to the file. 
+
+But what is your working directory. You get to know it with a command. 
+
+```{r}
+getwd()
+
+```
+
+When you first start Rstudio, it is good idea to change the working directory to the directory where the scripts and data of your current project are. The easiest way is to you the Files-browser in Rstudio, go to the right directory, and the click More >> Set As Working Directory. H
+
+You can also set the working directory with a command:
+
+```{r}
+setwd("~/github/kickstartr")  # write the right path 
+
+```
+
+*Separator used* 
+
+By deafult, read.table uses any whitespace character to separate different variables on rows. Often the separator is something else, like comma. In apgar.csv the same data is in CSV format (CSV = comma separated values), and the simple call to read.table fails. Try this and look at the data, because it very useful know how how does the data frame look like when the separator is wrong. Sooner or later you will encounter this kind of problem in your data analysis. 
+
+```{r}
+apgar <- read.table("apgar.csv")
+head(apgar)
+```
+
+Notice how even the variables has been not been read. The problem is easily corrected by specifying the separator. 
+```{r}
+apgar <- read.table("apgar.csv", sep=",")
+head(apgar)
+```
+
+Alternatively, you can use function read.delim, read.csv etc. They are just shortcuts to read.table with slightly different default values for the parameters like separator. 
+
+*Decimals are marked with comma, not with point*
+
+In Finnish, the convention is to use decimal comma, not point. By default SPSS, Excel etc. detect the locale settings of the operating systems and adapt their notation accordingy. This creates sometimes problems with other data analysis software, which often follow the English convention and use decimal comma. 
+
+
+```{r}
+# Separator is here ;
+apgar <- read.table("apgar_decimalcomma.txt", sep=";")
+head(apgar)
+```
+
+At first, everything seems to be fine, before you try to use some of the decimal values. 
+
+```{r}
+apgar$lgincome * 2
+```
+
+This can solved by specifying the decimal point character. 
+```{r}
+apgar <- read.table("apgar_decimalcomma.txt", dec=",", sep=";")
+head(apgar)
+```
+
+
+
+mystring<-
+  ("id,workshop,gender,q1,q2,q3,q4
+   1,1,f,1,1,5,1
+   2,2,f,2,1,4,1
+   3,1,f,2,2,4,3
+   4,2,f,3,1, ,3
+   5,1,m,4,5,2,4
+   6,2,m,5,4,5,5
+   7,1,m,5,3,4,4
+   8,2,m,4,5,5,5")
+
+mystring
+
+
+#Kokeillaas tällastakin:
+
+#fix(mystring) # Eikä! Tää on cowa! Avaa default text-editorin (notepad windowsissa)
+
+#Kun tiedoston sulkee, se tallentaa muutokset automaattisesti oikeaan temp-fileen ja sitä myötä
+#R:ään
+
+# Esimerkki jatkuu:
+
+# This reads it just as a text file but processing it
+# first through the textConnection function.
+
+mydata<-read.table(textConnection(mystring),
+                   header=TRUE,sep=",",row.names="id")
+mydata
+
+write.table(mydata, "mydata.csv",sep = ",",row.names = TRUE)
+#Tää laittaa colnamesit yhden pykälän pieleen, ei käsittele row.names-mjaa oikein
+
+write.csv(mydata, "mydata.csv",row.names = TRUE)
+#Tää laittaa colnamesit oikein
+rm(mydata)
+
+write.table()
+
+?write.table
+
+
+#Kokeillaan toista tiedostonavausesimerkkiä
+
+myfile <-("z:\\Documents\\mydata.txt")
+myfile2 <-("z:\\Documents\\mydata2.txt")
+myfile
+#onko tää muuten jossain tilanteessa eri kuin
+print(myfile)
+#?
+
+#Muuttujanimet nimimuuttujaan.
+#Esimerkin vuoksi ilman workshop-muuttujaa, joka halutaan jättää pois:
+
+myVariableNames<-c("id","wrkshp", "gender","q1","q2","q3","q4")
+myVariableNames
+
+#Muuttujien leveydet (# of char), -1 poisjätettäville mjille:
+myVariableWidths<-c(1,1,1,1,1,1,1)
+myVariableWidths
+class(myVariableWidths) #numerovektori
+
+mydata<-read.fwf(
+  file=myfile2,
+  width=myVariableWidths,
+  col.names=myVariableNames,
+  row.names="id",
+  fill=T,
+  strip.white=T, header=T)
+# Mä en vaan saa tätä toimimaan, en tiedä mistä on kyse. Valittaa koko ajan että datassa
+# on enemmän sarakkeita kuin muuttujannimiä. En tiä.
+
+test <- read.delim(myfile,header=T,sep="\t",row.names = "id")
+test
+
+#Ilman id-muuttujaa row namesina:
+test2 <- read.delim(myfile,header=T,sep="\t")
+
+
+
+library(foreign)
+apgar <- read.spss("apgar.sav",to.data.frame=TRUE)
+#View(apgar)
+#setwd("z:\\Documents\\muu työ\\KickStartR")
+#getwd()
+
+write.table(apgar, "apgar.txt", sep="\t")
+
+write.table(apgar, "apgar_decimalcomma.txt", sep=";", dec=',')
+
