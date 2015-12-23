@@ -1,0 +1,136 @@
+---
+title: "Select_observations"
+author: "Markus"
+date: "23 Dec 2015"
+output: html_document
+---
+
+Selecting observations from a data frame
+====================================================
+
+Previously, we created the dataset academics2 with the questionnaire responses
+Let's modify the data a bit further
+
+```{r}
+# Let's give the academics genders:
+
+academics2$gender <- c("M","M","F","M","F","M")
+
+# The names of the observations are stored in the row names vector that can be accessed using:
+
+row.names(academics2)
+
+# As you can see, the names are enclosed in quotes, so they are of type "character"
+# We could also give actual names to the observations, e.g.
+
+row.names(academics2)[1] <- "Cosmo Kiveskoski"
+row.names(academics2)[2] <- "Kalja Naulapää"
+row.names(academics2)[3] <- "Miina Kenttä"
+row.names(academics2)[4] <- "Heppu Kaalinpää"
+row.names(academics2)[5] <- "Merikeiju Jumalankiitos"
+row.names(academics2)[6] <- "Meirami Pervonkallio"
+
+academics2
+
+# Oops! THere's a mistake in the gender of the rector! Let's correct:
+
+academics2["Meirami Pervonkallio","gender"] <- "F"
+academics2
+
+#Names can be changed back to numbers by saying:
+row.names(academics2) <- as.character(1:6)
+
+#The result is equivalent to just saying:
+row.names(academics2) <- 1:6
+row.names(academics2)
+# But as we can see, the row names are enclosed in quotes, so they are of the type "character"
+# So R implicitly converts the numbers to characters for row names, trying to guess what 
+# we want
+```
+
+Sometimes it's necessary to create subsets of the data, to select only certain observations.
+
+```{r}
+# So how to select, e.g. only males?
+# We can do this by indexing the data frame as follows:
+
+academics2[academics2$gender == "M",]
+
+# The latter part actually creates a boolean vector (a vector of TRUE/FALSE values):
+
+academics2$gender == "M"
+
+# It's good to note that R is case-sensitive:
+
+academics2$gender == "m"
+
+# So we are asking the program to select the observations for which the logical expression is TRUE
+```
+
+Even though subsetting data frames using indices is a necessary skill to learn while using R,
+there is also a perhaps more intuitive command that can be used. It's called *subset* and it's a good option as long as you are not writing functions of your own. It works as follows:
+
+```{r}
+subset(academics2,salaryBeforeTaxes > 3000)
+```
+
+Here we chose the observations for which the logical test is TRUE. The *subset* command can also be used for selecting only certain variables using the option *select*
+
+```{r}
+subset(academics2,salaryBeforeTaxes > 3000, select = 5:8)
+```
+
+Then, a couple of exercises:
+
+How could we ask for the summary of all variables for FEMALES?
+
+Are the salaries of the females and males in this representative sample of academics equal?
+
+Back to Indexing
+---------------------
+
+Couple of more details of using the indices:
+
+```{r}
+academics2[ c(3,4,5,6), ] # is equal to:
+academics2[ c(3:6), ] # is equal to:
+academics2[ -c(1:2), ]
+```
+
+To understand the negative indices, you can think of Venn diagrams and the negation of a set.
+
+We can also use our brand new brilliant row names vector to choose observations. If, for instance, we want to have a look at Miina's values, we can say:
+
+```{r}
+academics2[ "Miina Kenttä" , ]
+
+#If you don't like Miina, you can do:
+
+academics2[ row.names(academics2) != "Miina Kenttä" , ]
+```
+
+Because the indexing implicitly creates logical vectors, you can also crate one explicitly and use it for choosing the observations:
+
+```{r}
+selection <- c(TRUE,TRUE,TRUE,TRUE,FALSE,FALSE)
+
+academics2[selection,]
+
+# The inverse is defined as:
+
+!selection
+
+# so
+
+academics2[!selection,]
+
+# For a quicker notation, ones and zeroes can also be used:
+
+academics2[as.logical(c(1,1,1,1,0,0)),]
+```
+
+As a final remark, indexing rows (observations) and columns (variables) can naturally be done simultaneously:
+
+```{r}
+academics2[academics2$gender == "F", 5:6]
+```
