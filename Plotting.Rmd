@@ -1,0 +1,150 @@
+---
+title: "Plotting"
+author: "Esko"
+date: "04.01.2016"
+output: html_document
+---
+
+Quite often students and even researchers think that the ultimate goal of data analysis is to get out some small p-values. Later in this course, we will again demonstrate why this is actually simply wrong and silly. 
+
+Instead, it is much better to think that the goal of the data analysis is to understand your data and to visualize your results. P-value testing is just an additional check that your results are not very likely just due to random variation. 
+
+Titanic data
+--------------------
+
+R has a plenty of datasets included, which can be used for demonstrations. These datasets can be loaded using the function data. 
+
+
+```{r}
+data(sleep)
+
+attach(sleep)
+plot(extra)
+plot(group, extra)
+plot(extra, col=group, xlab="Participant", ylab="Extra hours")
+detach(sleep)
+```
+
+
+```{r}
+with(sleep, plot(extra[group == 1], 
+                 extra[group == 2]))
+
+with(sleep, plot(extra[group == 1], 
+                 extra[group == 2],
+                 xlim=c(-2, 5), ylim=c(-2, 5)))
+
+
+with(sleep, t.test(extra[group == 1],
+                   extra[group == 2],
+                   paired=TRUE))
+                   
+```
+
+It is of course possible to reshape the data to wide format before plotting.
+
+```{r}
+
+require(reshape2)
+
+sleep.wide <- reshape(sleep, 
+                      v.names="extra", 
+                      timevar="group", 
+                      idvar="ID", 
+                      direction="wide")
+
+
+with(sleep.wide, plot(extra.1, extra.2))
+
+with(sleep.wide, plot(extra.1, extra.2, xlim=c(-2, 7), ylim=c(-2, 7)))
+
+
+sleep.wide$change <- sleep.wide$extra.2 - sleep.wide$extra.1 
+
+
+with(sleep.wide, t.test(extra.1,
+                        extra.2,
+                        paired=TRUE))
+
+```
+
+ggplot2 package
+--------------------
+
+The built-in plotting commands in R are powerful, but maybe not the most flexible to use. 
+Luckily, there are many packages which provide alternative ways for plotting data. 
+ggplot2 is one of my favorites. 
+
+The basic idea is simple: First you map the variable of the data frame to elements of the plot. Then you "add" different representation or "layers" to the plot. 
+
+First, there are example which replicate the previous example using ggplot. However, in order to fully appreaciate its possibility, we need to consider more complex data. 
+
+
+```{r}
+
+require(ggplot2)
+
+ggplot(sleep.wide, aes(x=extra.1, y=extra.2)) + 
+  geom_point()
+
+```
+First we create the ggplot2 object: we give it the data and then specify the aesthetics. After, that we can specify how it will be displayed. 
+
+```{r}
+
+ggplot(sleep.wide, aes(x=extra.1, y=extra.2)) + 
+  geom_point() +
+  xlim(-2, 7) +
+  ylim(-2, 7) +
+  xlab("Extra hours with drug 1") +
+  ylab("Extra hours with drug 2")
+  
+```
+
+Ok, let's now try to have a bit more complex example. First let's do something which is easy:
+
+```{r}
+ggplot(sleep, aes(x=group, y=extra, colour=group)) + 
+  geom_boxplot()
+
+ggplot(sleep, aes(x=group, y=extra, colour=group)) + 
+  geom_point()
+```
+
+It would be also nice to visualize the change using a connecting line between the two measurements from the same participant.
+
+```{r}
+ggplot(sleep, aes(x=group, y=extra)) + 
+  geom_point() +
+  geom_line(aes(group=ID)) # two different uses of group! they are different things here!
+
+ggplot(sleep, aes(x=group, y=extra, colour=ID)) + 
+  geom_point() +
+  geom_line(aes(group=ID)) # two different uses of group! they are different things here!
+
+```
+
+We could also want to display mean with 95 % and the individual points.
+
+```{r}
+ggplot(sleep, aes(x=group, y=extra, colour=group)) + 
+  stat_summary(fun.data="mean_cl_normal", size=3) +
+  geom_point(colour='black', shape='x', size=5)
+
+``` 
+Notice that I have adjusted the size and type of the symbols using parameter size and shape. I have also overrided the default colour for the crosses by specifying the parameter colour='black'. 
+
+I could add some more information and eye candy. 
+
+```{r}
+ggplot(sleep, aes(x=group, y=extra, colour=group)) + 
+  stat_summary(fun.data="mean_cl_normal", size=3) +
+  geom_point(colour='black', shape='x', size=5) +
+  xlab("Drug") +
+  ylab("Extra hours slept") +
+  scale_colour_discrete(name="Drug") +
+  theme_bw()
+
+``` 
+
+
