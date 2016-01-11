@@ -1,0 +1,216 @@
+---
+title: "Comparing groups"
+author: "Esko"
+date: "10.01.2016"
+output: html_document
+---
+
+Now we look for ways to compare goups using plots and statistical tests.  
+
+First, let's load the same data as in 1.3.1. I will also write the parametrization and aggregation again.  
+
+```{r}
+
+satest <- read.table("satest_sample_data.txt", header=TRUE)
+satest.bg <- read.table("satest_bgdata.txt", header=TRUE)
+
+
+satest$correct <- ((satest$answer == 'notpresent') & (satest$target_type == 'nothing')) |
+  ((satest$answer == 'present') & (satest$target_type != 'nothing'))
+
+require(plyr)
+corrects <- ddply(satest, .(age_grp, player_id), summarize,
+      correct.mean = mean(correct))
+
+corrects
+
+
+
+```
+
+
+Boxplot
+--------------------
+
+I typically prefer to plot the data graphically, especially when exploring what is going on.
+
+Now we have a continous variable correct.mean and we would like to compare two groups. For this purpose, boxplot is very useful. In R, boxplots can plotted using function boxplot. 
+
+This function was two ways to use it. The way is selected based on the first parameter given. If the first parameter is a data frame, the function makes a boxplot out of all the variables. When given a single variable, the results is a boxplot over all the values.
+
+```{r}
+boxplot(corrects) # not very informative here because the variables are not on the same scale
+boxplot(corrects$correct.mean) # ok
+
+```
+
+The most useful way to use boxplot here is to give a formula as the first parameter.  
+
+```{r}
+boxplot(correct.mean ~ age_grp, corrects)
+```
+
+
+The formulas are given with tilde ~. The variable on the left of the tilde is the variable to be boxplotted, and the variable on the right is the grouping variable. This should be a factor when used with function boxplot. 
+
+
+t-test
+-------------------------
+
+Using the same idea, it is easy to make between groups t-test. 
+
+```{r}
+t.test(correct.mean ~ age_grp, corrects)
+
+```
+
+Typically, it would just fine to copy the information from the output to an article manuscript.
+However, sometimes it would be useful to have a programmatic access to the results of a test. In R, it is possible, even quite easy (at least compared to SPSS...)  Look at the documentation of function t.test. Under heading Value, there are listed what components the return values contains. You can access these components with $.  
+
+```{r}
+
+res <- t.test(correct.mean ~ age_grp, corrects)
+
+res$estimate # estimated means
+res$estimate[1] # this is actually a vector, even thought it contains the name
+res$estimate[2]
+
+res$conf.int
+res$conf.int[1]
+res$conf.int[2]
+```
+
+Combining this with ddply, it is possible to create a table with means and 95 % confidence intervals for the group means. 
+
+```{r}
+
+corrects.M_95CI <- ddply(corrects, .(age_grp), summarize,
+      M = mean(correct.mean),
+      CI.lower = t.test(correct.mean)$conf.int[1],
+      CI.upper = t.test(correct.mean)$conf.int[2])
+      
+corrects.M_95CI
+
+```
+
+Merging two data files
+============================
+
+Is there any difference between males and females? In order to make a similar comparision, we need to somehow merge the satest performance data and the background data. This happens with function merge. 
+
+```{r}
+
+satest.merged <- merge(satest, satest.bg, by="player_id")
+```
+
+That was easy. 
+
+Now we can do the same as previous with this merged data. 
+
+```{r}
+corrects <- ddply(satest.merged, .(age_grp, sex, player_id), summarize,
+      correct.mean = mean(correct))
+
+corrects
+
+corrects.M_95CI <- ddply(corrects, .(sex), summarize,
+      M = mean(correct.mean),
+      CI.lower = t.test(correct.mean)$conf.int[1],
+      CI.upper = t.test(correct.mean)$conf.int[2])
+      
+corrects.M_95CI
+```
+
+The confidence intervals for group means overlap, so there is no statistically significant difference between males and females in this data. Of course, we can calculate the p-value also.
+
+```{r}
+
+t.test(correct.mean ~ sex, corrects)
+
+```
+
+
+
+
+2 x 2 boxplot
+==========================================
+
+We are not limited to one grouping value only.
+```{r}
+boxplot(correct.mean ~ age_grp + sex, corrects)
+
+# add some colors
+boxplot(correct.mean ~ age_grp + sex, corrects, col=c("red", "blue"))
+```
+
+
+
+Analysis of variance
+====================================
+
+Based on the boxplots, the interaction of age group and sex seems unlikely, but we could also test it. This cannot be tested with a t-test. We need analysis of variance. 
+
+The analysis of variance is a special case of linear model. Therefore, we can use the function lm to first fit a linear model. 
+```{r}
+
+fm <- lm(correct.mean ~ age_grp * sex, corrects)
+
+```
+
+Here we need a formula again. age_grp * sex means that we want to include both the main effects and the interacion of the age_grp and sex to the model. 
+
+Function summary and are useful for inspecting the model. The fitted model can be also given to plot command, which shows some diagnostic information. 
+
+```{r}
+
+summary(fm)
+anova(fm)
+plot(fm)
+```
+
+Unfortunately, there are multiple ways to calculate the Sums of Squares, which affect the F-values. The way above, uses type I of Sum of Squares. There are three points to consider. 1) It may not be the thing you want, 2) it may give misleading results when the data is not balanced (as is the case now), 3) SPSS/SAS uses the type III, so the results may be different. 
+
+The easiest way to overcome this problem is to use a package ez. A package, again!
+
+There we have quite user friendly function ezANOVA.  
+```{r}
+
+require(ez)
+
+fm.ez <- ezANOVA(corrects, 
+        dv=correct.mean,
+        wid=player_id,
+        between = .(age_grp, sex))
+```
+
+We got a friendly warning that our data is unbalanced, and therefore we should pay attention to the choice of argument type, which controls which kind of Sum of Squares are used. 
+
+```{r}
+fm.ez.ss1 <- ezANOVA(corrects, 
+        dv=correct.mean,
+        wid=player_id,
+        between = .(age_grp, sex),
+        type=1)
+
+fm.ez.ss2 <- ezANOVA(corrects, 
+        dv=correct.mean,
+        wid=player_id,
+        between = .(age_grp, sex),
+        type=2)
+
+fm.ez.ss3 <- ezANOVA(corrects, 
+        dv=correct.mean,
+        wid=player_id,
+        between = .(age_grp, sex),
+        type=3)
+```
+
+As we can see, the results are slightly different depending on the choice of SS type. 
+```{r}
+fm.ez.ss1
+fm.ez.ss2
+fm.ez.ss3
+```
+
+Read more about the problems with unequal variance here: http://onlinestatbook.com/2/analysis_of_variance/unequal.html
+

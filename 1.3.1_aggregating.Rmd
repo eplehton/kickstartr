@@ -1,0 +1,141 @@
+---
+title: "Aggregating data"
+author: "Esko"
+date: "10.01.2016"
+output: html_document
+---
+  
+  
+Let's first open some data.
+```{r}
+
+satest <- read.table("satest_sample_data.txt", header=TRUE)
+satest.bg <- read.table("satest_bgdata.txt", header=TRUE)
+
+```
+
+The experiment where the data is from is described here: https://tuhat.halvi.helsinki.fi/portal/files/54129212/Sahlberg_et_al_Learning_game.pdf
+
+The data is from a situation awareness test. For each participant (player_id) has viewed 27 video clips (clip_id). At some point each video was suddenly stopped and masked. Then two or more boxes were drawn on the screen. The participants were asked to select those boxes which overlapped with some traffic relevant target (pedestrian, bicyclist, car, view blocker). If the participant selected the box, the variable answer has a value "present". Otherwise its values is "notpresent". 
+
+satest.bg contains the background information. The only variables here are player_id and sex (m = male, f = female).
+
+We are interested to find out:
+
+- Do adults have more correct answerst than children?
+
+
+Parametrizations
+---------------------------------------------------------------
+
+First we create a new variable "correct"" using logical operators and some intermediate variables:
+
+```{r}
+
+satest$box_is_empty <- satest$answer == 'notpresent'
+satest$box_should_be_empty <- satest$target_type == 'nothing'
+satest$box_is_not_empty <- satest$answer == 'present'
+satest$box_should_not_be_empty <- satest$target_type != 'nothing'
+
+satest$correct <- (satest$box_is_empty == satest$box_should_be_empty) | 
+(satest$box_is_not_empty == satest$box_should_not_be_empty)
+
+# Let's view only those variables, in order to understand how the logic goes.
+head(with(satest, data.frame(answer, target_type, box_is_empty, box_should_be_empty, box_is_not_empty, box_should_not_be_empty, correct)))
+
+```
+
+I would write this with a single line, but it might be a bit harder to read:
+
+```{r}
+satest$correct <- ((satest$answer == 'notpresent') & (satest$target_type == 'nothing')) |
+  ((satest$answer == 'present') & (satest$target_type != 'nothing'))
+```
+
+Next we need to understand how R deals with boolean values (TRUE, FALSE). R treats TRUE essentially equivalent to 1 and FALSE as equivalent to 0. 
+
+```{r}
+TRUE == 1
+FALSE == 0
+TRUE == 0
+FALSE == 1
+```
+
+This happens also with other operators and functions:
+
+```{r}
+
+TRUE + TRUE
+TRUE - TRUE
+(TRUE + FALSE + TRUE) / 3
+
+mean(c(TRUE, FALSE, TRUE))
+sum(c(TRUE, FALSE, TRUE))
+```
+
+This means that we could take mean of all the correct values to get the proportion of correct answers. If we could calculate this proportion for each participant, then we would have a parameter which could be used to investigate the difference between adults and children. 
+
+
+Aggregating: split, apply and combine
+-------------------------------------------------
+  
+We have already seen how to calculate new values from existing variables. Then we have seen how to create a subsets of data. Next we combine these two things to have an extremely useful and powerful data manipulation techinique: split, apply and combine. After you master this, you will survive most of the data manipulation problems you will encounter. 
+
+Splitting means that we first divide the data frame by some variable(s), typically factor(s). Then we apply one of more functions to calculate new variables from the subsets of data. Then we combine the calculated variables together with the values which were used as a basis for splitting. 
+
+R itself have a powerful tools to handle this, but I will use package plyr to make things even more easier. 
+
+```{r}
+require(plyr)
+
+
+corrects <- ddply(satest, .(player_id), summarize,
+                  correct.mean = mean(correct))
+corrects
+
+# Function summarize looks what comes after it, and the aggregates the results. 
+# You can try to replacte the summarize with function transform and see what happens. 
+
+```
+
+We got a new data frame which contains the participant ids and the proportion of the correct answers. But we would like to have also information weather the participant was an adult or a child. In the original data we had that information and we can easily insert it to the newly created data frame. 
+
+
+```{r}
+corrects <- ddply(satest, .(age_grp, player_id), summarize,
+                  correct.mean = mean(correct))
+
+corrects
+```
+
+It does not matter weather age_grp is inserted before or after player_id. 
+
+As we now have a single observation for each participant, we can get some descriptive statistics using the same command again. 
+```{r}
+
+correct.desc <- ddply(corrects, .(age_grp), summarize, 
+                      M = mean(correct.mean),
+                      SD = sd(correct.mean),
+                      N = length(correct.mean))
+
+correct.desc
+```
+
+
+We could use function kable from package knirt to render this in a nicer way.  
+```{r}
+require(knitr)
+kable(correct.desc, digits=2)
+```
+
+
+If we would like to change the proportion to percents, we can just multiply the correct.mean by 100. 
+```{r}
+
+correct.desc <- ddply(corrects, .(age_grp), summarize, 
+                      M = mean(100 * correct.mean),
+                      SD = sd(100 * correct.mean),
+                      N = length(correct.mean)) # no point to multiply this
+
+correct.desc
+```

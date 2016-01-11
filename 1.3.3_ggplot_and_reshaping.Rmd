@@ -1,0 +1,295 @@
+---
+title: "ggplot2 and reshaping data"
+author: "Esko"
+date: "10.01.2016"
+output: html_document
+---
+
+
+Let's open the satest data again. 
+```{r}
+
+satest <- read.table("satest_sample_data.txt", header=TRUE)
+
+```
+
+The video clips can be divided to four groups. The first three videos are practice videos, which should be actually removed from the analysis. After that, the remaining 24 videos are made in sets of 8 videos. 
+
+Half of the participants made learning intervention between the first and second test (test_order == 1), and the other half performed the intervention between the second and third test (test_order == 2). 
+
+The tests were performed in three sets. Now we include that information to the data. 
+
+Recoding
+=====================
+
+It is easy to use logical operators to create a new variable set.
+
+```{r}
+
+satest$set <- 3
+satest$set[ satest$clip_order < 20] <- 2
+satest$set[ satest$clip_order < 11] <- 1
+satest$set[ satest$clip_order < 3] <- 0
+```
+
+Then we could create an ordered variable or ordered factor.
+```{r}
+satest$set <- ordered(satest$set)
+```
+
+However, there is a good package for recoding which may have a bit more readable syntax. It is up to you what you want to use. 
+
+```{r}
+require(car)
+ 
+satest$set <- recode(satest$clip_order, '0:2=0; 3:10=1; 11:19=2; 20:27=3')
+satest$set <- ordered(satest$set)
+```
+
+We could make the same for the age group variable. 
+
+```{r}
+
+satest$age_grp2 <- recode(satest$age_grp, '"C"="Child"; "A"="Adult"')
+
+```
+Notice that age_grp2 is already a factor. Typically R converts strings to factors by default. 
+
+Get rid of the practice clips, set == 0.
+
+```{r}
+satest <- subset(satest, set > 0)
+
+# the level 0 is still remembered in the factor definition, drop it as unnecessary
+satest$set 
+
+satest$set <- droplevels(satest$set)
+
+```
+
+Calculate the correct answers again.
+```{r}
+
+satest$correct <- ((satest$answer == 'notpresent') & (satest$target_type == 'nothing')) |
+  ((satest$answer == 'present') & (satest$target_type != 'nothing'))
+
+require(plyr)
+corrects <- ddply(satest, .(age_grp2, test_order, set, player_id), summarize,
+      correct.mean = mean(correct))
+
+corrects
+
+```
+
+Create a boxplot.
+```{r}
+
+boxplot(correct.mean ~ test_order * set * age_grp2, corrects, col=c("red", "blue"))
+```
+
+
+
+ggplot2 package
+===============================
+
+The built-in plotting commands in R are powerful, but may not be very intuitive to use. 
+Luckily, there are many packages which provide alternative ways for plotting data. 
+ggplot2 is one of my favorites. 
+
+The basic idea is simple: First you map the variable of the data frame to elements of the plot. Then you "add" different representation or "layers" to the plot. 
+
+First, there are example which replicate the previous example using ggplot. However, in order to fully appreaciate its possibility, we need to consider more complex data. 
+
+
+```{r}
+
+require(ggplot2)
+
+#ggplot(corrects, aes(x=set, y=correct.mean, colour=test_order)) + 
+#  geom_boxplot()
+
+
+```
+I have commented this out, because it actually gives an error message. Try it. What a cryptic error message it is! With R, you just need to get accustomed to them... 
+
+I myself run to this error message accidentally when writing the document, and I had to think a couple of seconds what might be wrong. Then I remembered: ggplot2  -- like many other R functions -- may behave differently depending on weather a variable is factor or not. 
+
+The problem here is that test_order is not converted to factor when when the data was read in. Only strings values are converted to factors by defaults. Because it is not a factor, ggplot2 tries to select discrete colours based on continuous variable and fails. 
+
+```{r}
+
+corrects$test_order <- factor(corrects$test_order)
+```
+
+But when everything is ok, then we can easily create many different kind of plots:
+```{r}
+ggplot(corrects, aes(x=set, y=correct.mean, colour=test_order)) + 
+  geom_boxplot()
+
+ggplot(corrects, aes(x=set, y=correct.mean, colour=test_order)) + 
+  geom_point()
+
+```
+
+The power of ggplot is that we can "add"" more thigs to the plot. 
+
+```{r}
+
+ggplot(corrects, aes(x=set, y=correct.mean, colour=test_order)) + 
+  geom_boxplot() + 
+  geom_point()
+
+ggplot(corrects, aes(x=set, y=correct.mean, colour=test_order)) + 
+  geom_boxplot() +
+  facet_grid(. ~ age_grp2)
+
+ggplot(corrects, aes(x=set, y=100*correct.mean, colour=test_order)) + 
+  geom_boxplot() +
+  facet_grid(. ~ age_grp2) +
+  xlab("Set") +
+  ylab("Correct (%)") +
+  scale_colour_discrete(name="Intervention", labels=c("1-2", "2-3"))
+
+```
+
+
+We can replace the boxplot with mean and 95 % CI, using stat_summary function which calculates these for us. 
+
+```{r}
+ggplot(corrects, aes(x=set, y=100*correct.mean, colour=test_order)) + 
+  stat_summary(fun.data="mean_cl_normal") +
+  facet_grid(. ~ age_grp2) +
+  xlab("Set") +
+  ylab("Correct (%)") +
+  scale_colour_discrete(name="Intervention", labels=c("1-2", "2-3"))
+
+```
+
+Well, that was ugly. Let's try:
+
+```{r}
+ggplot(corrects, aes(x=set, y=100*correct.mean, colour=test_order)) + 
+  stat_summary(fun.data="mean_cl_normal") +
+  facet_grid(test_order ~ age_grp2) +
+  xlab("Set") +
+  ylab("Correct (%)") +
+  scale_colour_discrete(name="Intervention", labels=c("1-2", "2-3"))
+
+```
+
+Or maybe rather:
+
+```{r}
+ggplot(corrects, aes(x=set, y=100*correct.mean, colour=test_order)) + 
+  stat_summary(fun.data="mean_cl_normal", position=position_dodge(width=0.5), size=1) +
+  facet_grid(. ~ age_grp2) +
+  xlab("Set") +
+  ylab("Correct (%)") +
+  scale_colour_discrete(name="Intervention", labels=c("1-2", "2-3"))
+
+```
+
+
+```{r}
+ggplot(corrects, aes(x=set, y=100*correct.mean, colour=test_order)) + 
+  stat_summary(fun.data="mean_cl_normal", position=position_dodge(width=0.5), size=1) +
+  facet_grid(. ~ age_grp2) +
+  xlab("Set") +
+  ylab("Correct (%)") +
+  scale_colour_discrete(name="Intervention", labels=c("1-2", "2-3")) +
+  theme_bw()
+
+```
+
+The plots can be saved using function ggsave. By default it saves the last ggplot object created.
+
+```{r}
+ggsave("sample_plot.png", height=10, width=10, units="cm", dpi=300)
+
+```
+
+Reshaping data
+==================================
+
+With SPSS, you are quite often forced to reshape data between long and wide format because analyzes or plots require the data in either of the format. Based on my experience, R is a bit different. Much more can be done with the long format of the data. Anyway, it is very good to know how to do the trick if needed. 
+
+Especially when plotting with ggplot2, you may need to reshape something. gglot requires that the variables on the data frame can be mapped to the elements of the plots (x-axis, y-axis, colour, shape etc.), and each data point is on a single row. 
+
+In the current data, it would be interesting to investigate the correlation between the first and the last set using a scatter plot. Corrects on the first set could be on the x-axis and corrects on the third on the y-axis. Now those values are on different rows, which is a problem for ggplot. 
+
+
+Long to wide
+------------------
+```{r}
+
+corrects.wide <- reshape(corrects, 
+        v.names="correct.mean", # data
+        timevar="set",          # grouping
+        idvar="player_id",
+        direction="wide")
+head(corrects.wide)
+
+
+```
+
+Wide to long
+---------------
+```{r}
+corrects.long <- reshape(corrects.wide, 
+        varying=c("correct.mean.1", "correct.mean.2", "correct.mean.3"), # data
+        v.names="set",                                                   # grouping
+        idvar="player_id",
+        direction="long")
+
+head(corrects.long)
+
+
+```
+
+It is quite easy to run into problems with reshape. The problems arise from the specification of the correct parameters. I have found it easiest to open the documentation for the reshape and then go through the parameters, including those which seem to apply. 
+
+Another possibility is to use... Yes, you guessed right, a package. 
+
+reshape2 package
+-----------------
+```{r}
+
+require(reshape2)
+
+corrects.wide2 <- dcast(corrects, player_id ~ set)
+corrects.wide2
+
+corrects.long2 <- melt(corrects.wide, 
+        id.vars = "player_id", 
+        measure.vars=c("correct.mean.1", "correct.mean.2", "correct.mean.3"),
+                       timevar="set",         
+        direction="wide")
+corrects.long2
+
+
+```
+
+
+Scatter plot between the first and the last set
+------------------------------------------------------
+
+
+```{r}
+
+ggplot(corrects.wide, aes(x=correct.mean.1, y=correct.mean.3)) + 
+  geom_point()
+
+ggplot(corrects.wide, aes(x=correct.mean.1, y=correct.mean.3, shape=age_grp2, colour=age_grp2)) + 
+  geom_point()
+
+```
+
+
+It is possible to calculate also the correlation like this:
+```{r}
+
+with(corrects.wide, cor(correct.mean.1, y=correct.mean.3))
+
+with(corrects.wide, cor.test(correct.mean.1, y=correct.mean.3))
+
+```

@@ -9,11 +9,11 @@ This is partly based an excellent tutorial [R for SAS and SPSS users](https://sc
 
 Let's start with a simple example...
 
-We have a dataset in a text file. The variables are separated with tabs (empty space). Variables names are on the first row. 
+We have a dataset in a text file. The variables are separated with tabs (empty space). Variables names are on the first row. R will try to guess weather a text file has variable names in the header or not, but quite often it fails. Adding header=TRUE helps. 
 
 ```{r}
 
-apgar <- read.table("apgar.txt")
+apgar <- read.table("apgar.txt", header=TRUE)
 head(apgar) # we used to preview only the start or head of the data frame
 
 ```
@@ -41,16 +41,16 @@ setwd("~/github/kickstartr")  # write the right path
 
 *Separator used* 
 
-By deafult, read.table uses any whitespace character to separate different variables on rows. Often the separator is something else, like comma. In apgar.csv the same data is in CSV format (CSV = comma separated values), and the simple call to read.table fails. Try this and look at the data, because it very useful know how how does the data frame look like when the separator is wrong. Sooner or later you will encounter this kind of problem in your data analysis. 
+By default, read.table uses any whitespace character to separate different variables on rows. Often the separator is something else, like comma. In apgar.csv the same data is in CSV format (CSV = comma separated values), and the simple call to read.table fails. Try this and look at the data, because it very useful know how how does the data frame look like when the separator is wrong. Sooner or later you will encounter this kind of problem in your data analysis. 
 
 ```{r}
-apgar <- read.table("apgar.csv")
-head(apgar)
+# apgar <- read.table("apgar.csv")
+# head(apgar)
 ```
 
-Notice how even the variables has been not been read. The problem is easily corrected by specifying the separator. 
+The problem is easily corrected by specifying the separator. 
 ```{r}
-apgar <- read.table("apgar.csv", sep=",")
+apgar <- read.table("apgar.csv", sep=",", header=TRUE)
 head(apgar)
 ```
 
@@ -63,7 +63,7 @@ In Finnish, the convention is to use decimal comma, not point. By default SPSS, 
 
 ```{r}
 # Separator is here ;
-apgar <- read.table("apgar_decimalcomma.txt", sep=";")
+apgar <- read.table("apgar_decimalcomma.txt", sep=";", header=TRUE)
 head(apgar)
 ```
 
@@ -75,7 +75,7 @@ apgar$lgincome * 2
 
 This can solved by specifying the decimal point character. 
 ```{r}
-apgar <- read.table("apgar_decimalcomma.txt", dec=",", sep=";")
+apgar <- read.table("apgar_decimalcomma.txt", dec=",", sep=";", header=TRUE)
 head(apgar)
 ```
 
@@ -93,7 +93,7 @@ View(apgar)
 
 
 Writing data
-=================================
+---------------------------
 All the above presented text data files were actually created from the aforementioned apgar.sav file. The following functions calls were used. 
 
 ```{r}
@@ -102,9 +102,14 @@ library(foreign)
 apgar <- read.spss("apgar.sav",to.data.frame=TRUE)
 
 # then save it
-write.table(apgar, "apgar.txt", sep="\t")
-write.table(apgar, "apgar.csv") # by default separated with comma
-write.table(apgar, "apgar_decimalcomma.txt", sep=";", dec=',')
+write.table(apgar, "apgar.txt", sep="\t", row.names=FALSE) # use tabs
+write.table(apgar, "apgar.csv", sep=",", row.names=FALSE)
+write.table(apgar, "apgar_decimalcomma.txt", sep=";", dec=',', row.names=FALSE)
+
+# note the col.names=FALSE
+# by default, R write also row.names
+# Typically row.names are equal to a consequtive numbering of the lines, 
+# which is not very useful to save.
 
 ```
 
