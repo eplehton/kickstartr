@@ -237,8 +237,9 @@ Wide to long
 ```{r}
 corrects.long <- reshape(corrects.wide, 
         varying=c("correct.mean.1", "correct.mean.2", "correct.mean.3"), # data
-        v.names="set",                                                   # grouping
+        v.names="correct.mean",                                   # grouping
         idvar="player_id",
+        timevar="set",
         direction="long")
 
 head(corrects.long)

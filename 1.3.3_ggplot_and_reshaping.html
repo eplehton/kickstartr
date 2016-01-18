@@ -612,18 +612,19 @@ head(corrects.wide)</code></pre>
 <h2>Wide to long</h2>
 <pre class="r"><code>corrects.long &lt;- reshape(corrects.wide, 
         varying=c(&quot;correct.mean.1&quot;, &quot;correct.mean.2&quot;, &quot;correct.mean.3&quot;), # data
-        v.names=&quot;set&quot;,                                                   # grouping
+        v.names=&quot;correct.mean&quot;,                                   # grouping
         idvar=&quot;player_id&quot;,
+        timevar=&quot;set&quot;,
         direction=&quot;long&quot;)
 
 head(corrects.long)</code></pre>
-<pre><code>##          age_grp2 test_order player_id time       set
-## 401_y1.1    Adult          1    401_y1    1 0.6071429
-## 403_y1.1    Adult          1    403_y1    1 0.7272727
-## 405_y1.1    Adult          1    405_y1    1 0.8181818
-## 407_y1.1    Adult          1    407_y1    1 0.5769231
-## 409_y1.1    Adult          1    409_y1    1 0.6250000
-## 411_y1.1    Adult          1    411_y1    1 0.7727273</code></pre>
+<pre><code>##          age_grp2 test_order player_id set correct.mean
+## 401_y1.1    Adult          1    401_y1   1    0.6071429
+## 403_y1.1    Adult          1    403_y1   1    0.7272727
+## 405_y1.1    Adult          1    405_y1   1    0.8181818
+## 407_y1.1    Adult          1    407_y1   1    0.5769231
+## 409_y1.1    Adult          1    409_y1   1    0.6250000
+## 411_y1.1    Adult          1    411_y1   1    0.7727273</code></pre>
 <p>It is quite easy to run into problems with reshape. The problems arise from the specification of the correct parameters. I have found it easiest to open the documentation for the reshape and then go through the parameters, including those which seem to apply.</p>
 <p>Another possibility is to use… Yes, you guessed right, a package.</p>
 </div>

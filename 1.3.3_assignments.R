@@ -27,12 +27,14 @@
 # 6) Load again the situation awareness data. Include the information about the set. 
 #
 # The design of the experiment was switching replications. Half of the participants 
-# had an intervetion between sets 1 and 2, and half between sets 2 and 3, 
+# had an intervention between sets 1 and 2, and half between sets 2 and 3, 
 #
 # Therefore, we should have a significant interaction of variables set and test_order, if
 # the intervention had any effect. 
 #
 # First, make a plot of the interaction using ggplot2. 
+
+
 
 # 7) Perform repeated measures ANOVA to test the interaction. This can be performed using 
 # function ezANOVA from package ez. 

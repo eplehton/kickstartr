@@ -26,6 +26,8 @@ pop$inc <- pop$Change.during.2014.Total > 0
 # b) those with increasing and descreasing population
 # c) for all four categories, large with increasing pop, large with decreasing pop etc.
 
+require(plyr)
+
 ddply(pop, .(large), summarise,
       M = mean(X31.12.2014.Total),
       SD = sd(X31.12.2014.Total),
@@ -45,8 +47,14 @@ ddply(pop, .(large, inc), summarise,
 ###################################
 # 4) Find out the equation for the standard error of mean (SEM). Then 
 # modify the ddply-calls above to include also it. 
+ 
+ddply(pop, .(large), summarise,
+      M = mean(X31.12.2014.Total),
+      SD = sd(X31.12.2014.Total),
+      N = length(X31.12.2014.Total),
+      SEM = SD / sqrt(N))
 
-
-
+# notice how N and SD are usable after they have been defined earlier in ddply call
+# etc.
 
 

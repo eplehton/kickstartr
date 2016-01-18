@@ -24,6 +24,11 @@
 
 # Hint! Use function names to investigate the data frames. Pay attention to the details. 
 
+titanic2 <- read.table("titanic_nocolnames.txt", sep=';', header=TRUE)
+names(titanic2)
+names(titanic2)[2:6]
+
+# Do you see what's happening?
 
 
 #############################

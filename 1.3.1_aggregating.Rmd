@@ -16,13 +16,13 @@ satest.bg <- read.table("satest_bgdata.txt", header=TRUE)
 
 The experiment where the data is from is described here: https://tuhat.halvi.helsinki.fi/portal/files/54129212/Sahlberg_et_al_Learning_game.pdf
 
-The data is from a situation awareness test. For each participant (player_id) has viewed 27 video clips (clip_id). At some point each video was suddenly stopped and masked. Then two or more boxes were drawn on the screen. The participants were asked to select those boxes which overlapped with some traffic relevant target (pedestrian, bicyclist, car, view blocker). If the participant selected the box, the variable answer has a value "present". Otherwise its values is "notpresent". 
+The data is from a situation awareness test. For each participant (player_id) has viewed 27 video clips (clip_id). At some point each video was suddenly stopped and masked. Then two or more boxes were drawn on the screen. The participants were asked to select those boxes which overlapped with some traffic relevant target (pedestrian, bicyclist, car, view blocker). If the participant selected the box, the variable answer has a value "present". Otherwise its value is "notpresent". 
 
 satest.bg contains the background information. The only variables here are player_id and sex (m = male, f = female).
 
 We are interested to find out:
 
-- Do adults have more correct answerst than children?
+- Do adults have more correct answers than children?
 
 
 Parametrizations
@@ -34,6 +34,7 @@ First we create a new variable "correct"" using logical operators and some inter
 
 satest$box_is_empty <- satest$answer == 'notpresent'
 satest$box_should_be_empty <- satest$target_type == 'nothing'
+
 satest$box_is_not_empty <- satest$answer == 'present'
 satest$box_should_not_be_empty <- satest$target_type != 'nothing'
 

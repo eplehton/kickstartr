@@ -372,40 +372,46 @@ academics</code></pre>
 </div>
 <div id="attach-and-detach" class="section level2">
 <h2>Attach and detach</h2>
+<p>First I will clear the previously created variables so that we do not get confused (as the lecturer did…).</p>
+<pre class="r"><code>rm(position)
+rm(salaryBeforeTaxes)
+rm(citations)
+rm(workingYears)</code></pre>
+<p>Try to use those variable! There not here anymore after removing them. However, the data they contained is still part of the data frame academics which was created. And those data frames do have those variables left, because they are part of the the data frame.</p>
+<pre class="r"><code>academics$position</code></pre>
+<pre><code>## [1] Thesis worker      Research assistant Doctoral student  
+## [4] Postdoc            Professos          Rector            
+## 6 Levels: Doctoral student Postdoc Professos ... Thesis worker</code></pre>
 <p>Notation can be simplified by giving a certain data frame a privileged status using attach:</p>
-<pre class="r"><code>academics$citationsPerYear &lt;- NULL # remove it so that it is newly created
+<pre class="r"><code>attach(academics)
 
-attach(academics)</code></pre>
-<pre><code>## The following objects are masked _by_ .GlobalEnv:
-## 
-##     citations, position, salaryBeforeTaxes, workingYears</code></pre>
-<pre class="r"><code>citationsPerYear &lt;- citations / workingYears
+citationsPerYear &lt;- citations / workingYears
 
 detach(academics)</code></pre>
 </div>
 <div id="with" class="section level2">
 <h2>With</h2>
 <p>Sometimes it can be easier to use with. It defines the data frame where to look up the variables, but it does not alter the data frame by default.</p>
-<pre class="r"><code>academics$citationsPerYear &lt;- NULL
-citationsPerYear &lt;- with(academics, citations / workingYears)
-# citationsPerYear is not added to academics
-academics</code></pre>
-<pre><code>##             position salaryBeforeTaxes citations workingYears costs
-## 1      Thesis worker                 0         0            0     0
-## 2 Research assistant              1360         1            1  2652
-## 3   Doctoral student              1760         8            3  3432
-## 4            Postdoc              2560        30            8  4992
-## 5          Professos              4400      7784           20  8580
-## 6             Rector             20000      2021           30 39000
-##   new_costs citatonsPerCitations hasCitations
-## 1       0.0                  NaN            0
-## 2    2121.6                    1            1
-## 3    2745.6                    1            1
-## 4    3993.6                    1            1
-## 5    6864.0                    1            1
-## 6   31200.0                    1            1</code></pre>
+<pre class="r"><code>citationsPerYear &lt;- with(academics.cryptic, cit / wyr)
+# citations per year is not added to academics
+academics.cryptic</code></pre>
+<pre><code>##                  pos   slr  cit wyr
+## 1      Thesis worker     0    0   0
+## 2 Research assistant  1700    1   1
+## 3   Doctoral student  2200    8   3
+## 4            Postdoc  3200   30   8
+## 5          Professos  5500 7784  20
+## 6             Rector 25000 2021  30</code></pre>
 <pre class="r"><code># If you want to add it, write like this:
-academics$citationsPerYear &lt;- with(academics, citations / workingYears)</code></pre>
+academics.cryptic$cpt &lt;- with(academics.cryptic, cit / wyr)
+academics.cryptic</code></pre>
+<pre><code>##                  pos   slr  cit wyr        cpt
+## 1      Thesis worker     0    0   0        NaN
+## 2 Research assistant  1700    1   1   1.000000
+## 3   Doctoral student  2200    8   3   2.666667
+## 4            Postdoc  3200   30   8   3.750000
+## 5          Professos  5500 7784  20 389.200000
+## 6             Rector 25000 2021  30  67.366667</code></pre>
 </div>
 </div>
 <div id="using-some-functions" class="section level1">
@@ -413,7 +419,7 @@ academics$citationsPerYear &lt;- with(academics, citations / workingYears)</code
 <p>We can use functions like “mean” and “sum” to calculate things from the vectors.</p>
 <pre class="r"><code>mean(academics$salaryBeforeTaxes)</code></pre>
 <pre><code>## [1] 5013.333</code></pre>
-<pre class="r"><code>sum(citations)</code></pre>
+<pre class="r"><code>sum(academics$citations)</code></pre>
 <pre><code>## [1] 9844</code></pre>
 <p>However, quite often there are missing values or other invalid data. In these cases, the functions quite often return NA = not available or NaN = not a number or something similar.</p>
 <pre class="r"><code>mean(academics$citationsPerYear)</code></pre>
@@ -431,13 +437,13 @@ academics</code></pre>
 ## 4            Postdoc              2560        30            8  4992
 ## 5          Professos              4400      7784           20  8580
 ## 6             Rector             20000      2021           30 39000
-##   new_costs citatonsPerCitations hasCitations citationsPerYear valid
-## 1       0.0                  NaN            0              NaN     0
-## 2    2121.6                    1            1         1.000000     1
-## 3    2745.6                    1            1         2.666667     1
-## 4    3993.6                    1            1         3.750000     1
-## 5    6864.0                    1            1       389.200000     1
-## 6   31200.0                    1            1        67.366667     1</code></pre>
+##   new_costs citatonsPerCitations citationsPerYear hasCitations valid
+## 1       0.0                  NaN              NaN            0     0
+## 2    2121.6                    1         1.000000            1     1
+## 3    2745.6                    1         2.666667            1     1
+## 4    3993.6                    1         3.750000            1     1
+## 5    6864.0                    1       389.200000            1     1
+## 6   31200.0                    1        67.366667            1     1</code></pre>
 </div>
 <div id="matrices" class="section level1">
 <h1>Matrices</h1>
@@ -450,23 +456,23 @@ kek</code></pre>
 <pre><code>##  [1]  1  3  5  7  9 11 13 15 17 19</code></pre>
 <pre class="r"><code>kone &lt;- runif(n = 10,min = 1,max=30)
 kone</code></pre>
-<pre><code>##  [1] 25.150219 19.264553  9.592231 29.170729  8.736885  4.438213 21.053707
-##  [8] 15.456856 19.896173 23.228934</code></pre>
+<pre><code>##  [1] 12.099132 18.942312 27.529360  3.080228  1.511769 16.548679 24.882234
+##  [8] 25.464614  7.450905 15.621402</code></pre>
 <pre class="r"><code>#kone is a vector of random uniformly distributed continuous values, picked from the range [1...30]
 
 kekkone &lt;- cbind(kek,kone)
 kekkone</code></pre>
 <pre><code>##       kek      kone
-##  [1,]   1 25.150219
-##  [2,]   3 19.264553
-##  [3,]   5  9.592231
-##  [4,]   7 29.170729
-##  [5,]   9  8.736885
-##  [6,]  11  4.438213
-##  [7,]  13 21.053707
-##  [8,]  15 15.456856
-##  [9,]  17 19.896173
-## [10,]  19 23.228934</code></pre>
+##  [1,]   1 12.099132
+##  [2,]   3 18.942312
+##  [3,]   5 27.529360
+##  [4,]   7  3.080228
+##  [5,]   9  1.511769
+##  [6,]  11 16.548679
+##  [7,]  13 24.882234
+##  [8,]  15 25.464614
+##  [9,]  17  7.450905
+## [10,]  19 15.621402</code></pre>
 <pre class="r"><code>#cbind is a short for &quot;bind columns together&quot;, and that's what was done
 
 class(kekkone)</code></pre>
@@ -478,36 +484,36 @@ class(kekkone)</code></pre>
 
 kekkone.df</code></pre>
 <pre><code>##    kek      kone
-## 1    1 25.150219
-## 2    3 19.264553
-## 3    5  9.592231
-## 4    7 29.170729
-## 5    9  8.736885
-## 6   11  4.438213
-## 7   13 21.053707
-## 8   15 15.456856
-## 9   17 19.896173
-## 10  19 23.228934</code></pre>
+## 1    1 12.099132
+## 2    3 18.942312
+## 3    5 27.529360
+## 4    7  3.080228
+## 5    9  1.511769
+## 6   11 16.548679
+## 7   13 24.882234
+## 8   15 25.464614
+## 9   17  7.450905
+## 10  19 15.621402</code></pre>
 <p>```</p>
 <p>If the values in the vectors were the values of ten different values, we could say:</p>
 <pre class="r"><code>konekek &lt;- rbind(kek,kone)
 konekek</code></pre>
-<pre><code>##          [,1]     [,2]     [,3]     [,4]     [,5]      [,6]     [,7]
-## kek   1.00000  3.00000 5.000000  7.00000 9.000000 11.000000 13.00000
-## kone 25.15022 19.26455 9.592231 29.17073 8.736885  4.438213 21.05371
-##          [,8]     [,9]    [,10]
-## kek  15.00000 17.00000 19.00000
-## kone 15.45686 19.89617 23.22893</code></pre>
+<pre><code>##          [,1]     [,2]     [,3]     [,4]     [,5]     [,6]     [,7]
+## kek   1.00000  3.00000  5.00000 7.000000 9.000000 11.00000 13.00000
+## kone 12.09913 18.94231 27.52936 3.080228 1.511769 16.54868 24.88223
+##          [,8]      [,9]   [,10]
+## kek  15.00000 17.000000 19.0000
+## kone 25.46461  7.450905 15.6214</code></pre>
 <pre class="r"><code># rbind is short for &quot;bind rows together&quot;, or stack them on top of one another
 
 konekek.df &lt;- as.data.frame(konekek)
 konekek.df</code></pre>
-<pre><code>##            V1       V2       V3       V4       V5        V6       V7
-## kek   1.00000  3.00000 5.000000  7.00000 9.000000 11.000000 13.00000
-## kone 25.15022 19.26455 9.592231 29.17073 8.736885  4.438213 21.05371
-##            V8       V9      V10
-## kek  15.00000 17.00000 19.00000
-## kone 15.45686 19.89617 23.22893</code></pre>
+<pre><code>##            V1       V2       V3       V4       V5       V6       V7
+## kek   1.00000  3.00000  5.00000 7.000000 9.000000 11.00000 13.00000
+## kone 12.09913 18.94231 27.52936 3.080228 1.511769 16.54868 24.88223
+##            V8        V9     V10
+## kek  15.00000 17.000000 19.0000
+## kone 25.46461  7.450905 15.6214</code></pre>
 <pre class="r"><code>names(konekek.df) &lt;- c(&quot;Openness&quot;, &quot;Conscientciousness&quot;, &quot;Extroversion&quot;,&quot;Agreeableness&quot;,
                        &quot;Neuroticism&quot;, paste(&quot;X&quot;,1:5,sep=&quot;&quot;))
 names(konekek.df)</code></pre>
@@ -517,26 +523,26 @@ names(konekek.df)</code></pre>
 ## [10] &quot;X5&quot;</code></pre>
 <pre class="r"><code>konekek.df</code></pre>
 <pre><code>##      Openness Conscientciousness Extroversion Agreeableness Neuroticism
-## kek   1.00000            3.00000     5.000000       7.00000    9.000000
-## kone 25.15022           19.26455     9.592231      29.17073    8.736885
-##             X1       X2       X3       X4       X5
-## kek  11.000000 13.00000 15.00000 17.00000 19.00000
-## kone  4.438213 21.05371 15.45686 19.89617 23.22893</code></pre>
+## kek   1.00000            3.00000      5.00000      7.000000    9.000000
+## kone 12.09913           18.94231     27.52936      3.080228    1.511769
+##            X1       X2       X3        X4      X5
+## kek  11.00000 13.00000 15.00000 17.000000 19.0000
+## kone 16.54868 24.88223 25.46461  7.450905 15.6214</code></pre>
 <pre class="r"><code># Vectors can be combined by c (short for combine)
 longvector &lt;- c(kek,kone)</code></pre>
 <p>Data frame can be easily converted to 2 x 2 matrix.</p>
 <pre class="r"><code>as.matrix(kekkone.df)</code></pre>
 <pre><code>##       kek      kone
-##  [1,]   1 25.150219
-##  [2,]   3 19.264553
-##  [3,]   5  9.592231
-##  [4,]   7 29.170729
-##  [5,]   9  8.736885
-##  [6,]  11  4.438213
-##  [7,]  13 21.053707
-##  [8,]  15 15.456856
-##  [9,]  17 19.896173
-## [10,]  19 23.228934</code></pre>
+##  [1,]   1 12.099132
+##  [2,]   3 18.942312
+##  [3,]   5 27.529360
+##  [4,]   7  3.080228
+##  [5,]   9  1.511769
+##  [6,]  11 16.548679
+##  [7,]  13 24.882234
+##  [8,]  15 25.464614
+##  [9,]  17  7.450905
+## [10,]  19 15.621402</code></pre>
 </div>
 
 

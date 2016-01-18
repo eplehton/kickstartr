@@ -26,10 +26,10 @@
 
 
 #############################
-# 5) Divide the population data according to the population change.
+# 5) Divide the population data by the population change (decreasing, increasing). 
 #
 # Before you find out the right answers to the following questions based on the data, 
-# try create a hypothesis. 
+# try create a hypothesis:
 #
 # Are there more municipalities with increasing population than with decreasing population? 
 #
@@ -41,6 +41,7 @@
 
 ############################
 # 7) Is there municipalities which attract more females than males and vice versa?
-
+# Updated: The question is actually a bit complicated. You can just look for example
+# are there municipalities which has females moving in and males moving out.
 
 

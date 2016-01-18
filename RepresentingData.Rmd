@@ -1,5 +1,5 @@
 ---
-title: "Data frames and matrices"
+title: "Representing data and making simple calculations"
 output: html_document
 ---
 
@@ -9,7 +9,7 @@ Objects are way to represent data in a programming language like R. For differen
 Vectors
 ==========================
 
-In R, the basic objects is vector. It is an ordered set of data containing one or more elements. 
+In R, the basic object is vector. It is an ordered set of data containing one or more elements. 
 
 When you enter text to the R console, the interpreted will parse your input, and create a vector. The vectors "know" what kind of data they have in them.
 
@@ -47,9 +47,9 @@ length(c("Vector", "says", "hello!"))
 ```
 
 Variables 
-----------------------------
+=========================
 
-The power of programming languega is based on the possibility to describe the algorithm (= what will be computed) regardless of the actual data. Here we need variables, which can represent the data. 
+The power of programming language is on the possibility to describe the algorithm (= what will be computed) regardless of the actual data. For this we need variables, which can represent the actual objects in the algorithm. 
 
 ```{r}
 
@@ -63,7 +63,7 @@ Here the R console first creates a vector of type numbers with one member (2734.
 
 
 Operators
---------------------------
+===========================
 
 Objects represent data and variables can represent them in algorithms. In the previous example, we used multiplication which was represented as *. * is an operator. When an operator encounters objects (or variables which can represent them), new objects are created. 
 
@@ -123,71 +123,6 @@ Most of the time researchers in behavioural sciences are working with data which
 
 Data frames can be constructed by stacking vectors beside each other or on top of each other
 
-```{r}
-# First beside one another
-# Let's create a couple of vectors
-
-kek <- seq(1,20,2)
-kek
-kone <- runif(n = 10,min = 1,max=30)
-kone
-
-#kone is a vector of random uniformly distributed continuous values, picked from the range [1...30]
-
-kekkone <- cbind(kek,kone)
-kekkone
-
-#cbind is a short for "bind columns together", and that's what was done
-
-class(kekkone)
-# we created a matrix, which is a little different from a data frame
-# A matrix can usually be transformed into a data frame by saying:
-
-kekkone.df <- as.data.frame(kekkone)
-kekkone.df
-
-# A simple way to do the same thing in this case would be:
-
-data.frame(kek,kone)
-```
-
-If the values in the vectors were the values of ten different values, we could say:
-
-```{r}
-konekek <- rbind(kek,kone)
-konekek
-
-# rbind is short for "bind rows together", or stack them on top of one another
-
-konekek.df <- as.data.frame(konekek)
-konekek.df
-
-names(konekek.df) <- c("Openness", "Conscientciousness", "Extroversion","Agreeableness",
-                       "Neuroticism", paste("X",1:5,sep=""))
-names(konekek.df)
-konekek.df
-
-# Vectors can be combined by c (short for combine)
-longvector <- c(kek,kone)
-
-
-```
-
-Little heading
---------------------------
-
-```{r}
-
-# There are also other conversion options, for instance from data frame to matrix
-
-as.matrix(kekkone.df)
-
-
-
-```
-
-
-One more example
 
 ```{r}
 
@@ -223,6 +158,15 @@ View(academics)
 
 ```
 
+
+
+Dots . in the variable or function names
+----------------------------------------
+
+In the previous example, we saved the data frame with a variable name which had an ending ".df". It is good to notice that there is nothing magical here. It is just a part of the variable name, and we could have used any other valid variables name. Unlike to many other programming languages like Python, Java or MATLAB, dot (.) is not used for accessing object/struct members. R uses $-symbol for that purpose. 
+
+
+
 Accessing the data in data frames
 -----------------------------------------
 
@@ -233,10 +177,36 @@ Vectors (or variables) within data frames can be easily accessed and used with $
 academics$salaryBeforeTaxes
 ```
 
+Using function names, it is also possible to get all the variables names as a vector. 
+
+```{r}
+# get the names as a vector
+names(academics)  
+
+```
+This can be also used to change them. 
+```{r}
+# set the names from a vector
+academics.cryptic <- academics # make a copy of the data frame first
+
+names(academics.cryptic)
+
+# Use short cryptic variable names and you will be viewed as
+# - super-intelligent bt all non-programmers 
+# - super-stupid by all who know how to program
+names(academics.cryptic) <- c("pos", "slr", "cit", "wyr")   
+# Remember that your scripts are the best (and typically only) documentation
+# for your data-analysis. Make them readable and accessible! 
+names(academics.cryptic)
+```
+
 Because they were first creates as vectors, they behave like vectors also when they are part of a data frame. 
 ```{r}
 academics$salaryBeforeTaxes * 1.56
 ```
+
+Creating new variables to data frames 
+----------------------------------------------------
 
 Often we need to calculate something from the existing variables in the data frame and then include them to the data frame. 
 ```{r}
@@ -252,26 +222,13 @@ academics
 academics$citatonsPerCitations <- academics$citations / academics$citations
 academics
 
-# If we made a mistake in creating the new variable, we can "cancel" creating it:
+# If we made a mistake in creating the new variable, we can "cancel" creating it. 
 academics$citationsPerCitations <- NULL
 
-# The command assigned "emptiness" as the value of the variable:
+# The command assigned "emptiness" as the value of the variable, and see, it is gone!
 academics
 ```
 
-
-# Notation can be simplified by giving a certain data frame a privileged status using attach:
-
-```{r}
-academics$citationsPerYear <- NULL # remove it so that it is newly created
-
-attach(academics)
-
-citationsPerYear <- citations / workingYears
-
-detach(academics)
-
-```
 
 There are also other ways for that
 
@@ -282,6 +239,9 @@ academics <- transform(academics,
           citationsPerYear = citations / workingYears)
 academics
 ```
+
+
+
 
 Creating values conditionally
 --------------------------------------
@@ -296,6 +256,24 @@ academics$hasCitations <- ifelse(academics$citations > 0, 1 ,0)
 academics
 
 ```
+
+Attach and detach
+-----------------------
+Notation can be simplified by giving a certain data frame a privileged status using attach:
+
+```{r}
+academics$citationsPerYear <- NULL # remove it so that it is newly created
+
+attach(academics)
+
+citationsPerYear <- citations / workingYears
+
+detach(academics)
+
+```
+
+
+
 
 Comparative operators 
 --------------------------------
@@ -327,4 +305,76 @@ Calculating something based on non-missing values: a bit advanced stuff => reorg
 
 
 ```
+
+
+
+Matrices
+===============================
+
+Data frames are 2 x 2 tables, variables always on columns and cases on rows. It is good to know, that there is also another way to represent tabular data using matrices. Matrices are R's equivalent to matrices in linear algebra, and they "know" how to become in matrix like fashion with some of the operators. 
+
+
+```{r}
+# First beside one another
+# Let's create a couple of vectors
+
+kek <- seq(1,20,2)
+kek
+kone <- runif(n = 10,min = 1,max=30)
+kone
+
+#kone is a vector of random uniformly distributed continuous values, picked from the range [1...30]
+
+kekkone <- cbind(kek,kone)
+kekkone
+
+#cbind is a short for "bind columns together", and that's what was done
+
+class(kekkone)
+names(kekkone)
+```
+We have created a matrix. Notice names does not give a vector of variable names. Matrix can usually be transformed into a data frame by saying:
+
+```{r}
+
+kekkone.df <- as.data.frame(kekkone)
+
+kekkone.df
+```
+
+
+
+
+```
+
+If the values in the vectors were the values of ten different values, we could say:
+
+```{r}
+konekek <- rbind(kek,kone)
+konekek
+
+# rbind is short for "bind rows together", or stack them on top of one another
+
+konekek.df <- as.data.frame(konekek)
+konekek.df
+
+
+names(konekek.df) <- c("Openness", "Conscientciousness", "Extroversion","Agreeableness",
+                       "Neuroticism", paste("X",1:5,sep=""))
+names(konekek.df)
+konekek.df
+
+# Vectors can be combined by c (short for combine)
+longvector <- c(kek,kone)
+
+
+```
+
+Data frame can be easily converted to 2 x 2 matrix. 
+```{r}
+
+as.matrix(kekkone.df)
+
+```
+
 

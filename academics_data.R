@@ -12,10 +12,10 @@ salaryBeforeTaxes <- c(thesisWorker,
                        professor,
                        rector)
 
-salaryBeforeTaxes 
+ 
 
 employerCosts <- salaryBeforeTaxes * 1.56 
-employerCosts
+
 
 position <- c("Thesis worker", 
               "Research assistant",
@@ -33,6 +33,10 @@ citations <- c(0,
                7784,
                2021)
 academics <- data.frame(position, salaryBeforeTaxes, citations, workingYears)
+
+# add gender
+academics$gender <- c("M","M","F","M","F","M")
+
 
 bachelor <- c(1,3,4,4,5,5)
 master <- c(1,2,4,5,5,5)

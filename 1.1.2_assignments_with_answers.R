@@ -13,8 +13,9 @@ titanic <- read.table("titanic_colnames.txt", sep=':')
 titanic2 <- read.table("titanic_nocolnames.txt", sep=';')
 
 # Do you see any difference between the two data frames?
-# - column names
-# - row number column as data
+# - Variable/column names missing in the second
+# - Row names included as a variable: the file had row names written
+#   which is default option for R's write.table. 
 
 #############################
 # 3) The second data frame does not have meaningful columns names, because they were 
@@ -25,6 +26,11 @@ titanic2 <- read.table("titanic_nocolnames.txt", sep=';')
 # Hint! Use function names to investigate the data frames. Pay attention to the details. 
 
 names(titanic2)[2:6] <- names(titanic)
+# then we can get rid of the first unnecessary variable for example using
+titanic2[1] <- NULL
+
+# Ok, this was a bit tricky at this point.
+
 
 #############################
 # 4) Investigate the variables in another of the data frames. 
@@ -45,15 +51,19 @@ is.factor(titanic$Freq)
 is.ordered(titanic$Class) 
 # etc
 
+# change it to ordered: create ordered and assing it to the data frame
 titanic$Class <- ordered(titanic$Class)
+
+
 
 ###############################
 # 5) Load the academics data from academics_data.R. This is slightly modified 
 # version of the data displayed during the lecture. 
 # Hint: ?source 
 
-
 source('academics_data.R')
+# this is pretty much the same as you would copy paste all the code from 
+# academics_data.R and run it here
 
 ###############################
 # 6) Write academics data to three text files using different settings.   

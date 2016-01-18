@@ -73,7 +73,16 @@ describe(coffee)
 
 #############################
 # 6) Learn to use function cor for calculation correlations. 
- 
+
+# This was a bit confusing, because everything works like this 
+# cor(articlesSubmitted, coffeeConsumption)
+# because articlesSubmitted and coffeeConsumption refer to 
+# variables which were previously created.
+# 
+# But let's remove them, and access the data through the coffee table only:
+rm(articlesSubmitted) # remove the variable
+rm(coffeeConsumption)
+
 # What is Pearson's correlation of articles submitted and coffee consumption?
 
 cor(coffee$articlesSubmitted, coffee$coffeeConsumption)

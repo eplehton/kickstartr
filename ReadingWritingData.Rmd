@@ -80,6 +80,38 @@ head(apgar)
 ```
 
 
+Reading SPSS files
+------------------------
+R can read for example SPSS-files directly, using package foreing
+
+```{r}
+library(foreign)
+apgar <- read.spss("apgar.sav",to.data.frame=TRUE)
+
+View(apgar)
+```
+
+
+Writing data
+=================================
+All the above presented text data files were actually created from the aforementioned apgar.sav file. The following functions calls were used. 
+
+```{r}
+write.table(apgar, "apgar.txt", sep="\t")
+write.table(apgar, "apgar.csv") # by default separated with comma
+write.table(apgar, "apgar_decimalcomma.txt", sep=";", dec=',')
+
+```
+
+
+
+Jaa... 
+================================
+
+Toki tämä textConnection kikka on joskus tosi kätevä, mutta pahimmassa tapauksessa ihmiset luulee että se on suositeltava tapa jos aloitetaan moiselle...
+
+
+```{r}
 
 mystring<-
   ("id,workshop,gender,q1,q2,q3,q4
@@ -167,7 +199,6 @@ apgar <- read.spss("apgar.sav",to.data.frame=TRUE)
 #setwd("z:\\Documents\\muu työ\\KickStartR")
 #getwd()
 
-write.table(apgar, "apgar.txt", sep="\t")
 
-write.table(apgar, "apgar_decimalcomma.txt", sep=";", dec=',')
 
+```

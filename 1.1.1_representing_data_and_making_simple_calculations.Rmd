@@ -309,11 +309,25 @@ In the above, we used comparator operator >. They can be used to compare things,
 
 Attach and detach
 -----------------------
-Notation can be simplified by giving a certain data frame a privileged status using attach:
+
+First I will clear the previously created variables 
+so that we do not get confused (as the lecturer did...). 
 
 ```{r}
-academics$citationsPerYear <- NULL # remove it so that it is newly created
+rm(position)
+rm(salaryBeforeTaxes)
+rm(citations)
+rm(workingYears)
+```
+Try to use those variable! There not here anymore after removing them. However, the data they contained is still part of the data frame academics which was created. And those data frames do have those variables left, because they are part of the the data frame. 
+```{r}
+academics$position
+```
 
+Notation can be simplified by giving a certain data frame a privileged status using attach:
+
+
+```{r}
 attach(academics)
 
 citationsPerYear <- citations / workingYears
@@ -327,13 +341,15 @@ With
 Sometimes it can be easier to use with. It defines the data frame where to look up the variables, but it does not alter the data frame by default. 
 
 ```{r}
-academics$citationsPerYear <- NULL
-citationsPerYear <- with(academics, citations / workingYears)
-# citationsPerYear is not added to academics
-academics
+
+
+citationsPerYear <- with(academics.cryptic, cit / wyr)
+# citations per year is not added to academics
+academics.cryptic
 
 # If you want to add it, write like this:
-academics$citationsPerYear <- with(academics, citations / workingYears)
+academics.cryptic$cpt <- with(academics.cryptic, cit / wyr)
+academics.cryptic
 ```
 
 
@@ -345,7 +361,7 @@ We can use functions like "mean" and "sum" to calculate things from the vectors.
 ```{r}
 
 mean(academics$salaryBeforeTaxes)
-sum(citations)
+sum(academics$citations)
 ```
 
 However, quite often there are missing values or other invalid data. In these cases, the functions 
