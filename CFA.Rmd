@@ -1,0 +1,121 @@
+---
+title: "CFA"
+author: "Markus"
+date: "January 8, 2016"
+output: html_document
+---
+
+Previously we noticed that the three-factor solution was a good description of the cognitive capacity test items in one of the schools (Pasteur school). The three factors were named Textual ability, Visual ability and Processing speed. We ended up with this conclusion by using Exploratory Factor Analysis (EFA). What if we have now collected new data from another school, and would like to test if the three-factor model fits the newly collected data (Grant-White school)? We have at least two options: 1) We could perform a new EFA and use a rotation procedure called "target loadings" (with the loading pattern found in the previous EFA serving as the target) or 2) We could perform a Confirmatory Factor Analysis (CFA), specifying the structure found in the first EFA as the model to be tested. 
+
+CFA is indeed a method for testing models. As always in science, good models are simple, yet predictive of new data. The three-factor model is a simple model of the test data: instead of speaking of nine distinct entities (the subtests), perhaps we can capture what's essential in the data by speaking only of three entities: Textual ability, Visual ability and Processing speed. We will now use CFA to test whether it is also a model that fits data collected independently from our first data.
+
+It is worth noting in the beginning that CFA is a restrictive model of the data: it assumes that the sub-tests have a non-zero loading on the factors they are assumed to measure, and zero loadings on the other factors. The same idea can be expressed as a table, with the nine variables as rows and the three factors as columns:
+
+```{r echo=FALSE, message = FALSE, results="hide"}
+library(lavaan)
+library(psych)
+meas.idea <- matrix(c(rep("X",3),rep(0,3),rep(0,3),rep(0,3),rep("X",3),rep(0,3), rep(0,3),rep(0,3),rep("X",3)),
+       nrow=9,ncol=3,byrow=F)
+rownames(meas.idea) <- paste("x",seq(1:9),sep="")
+colnames(meas.idea) <- c("Visual","Language", "Speed")
+meas.idea
+```
+
+```{r echo = FALSE}
+as.data.frame(meas.idea)
+```
+
+
+So even though the CFA model would be conceptually correct, real-world data being always a little bit messy might lead to the CFA calculations alerting of a bad model fit. There are, however, interesting new modeling tools such as Bayesian SEM and Exploratory Structural Equation Modeling (ESEM) that attempt to deal with this problem. We won't look into them here, however, this being a basic course.
+
+
+```{r echo = F, message= F, results = "hide"}
+Pasteur <- with(HolzingerSwineford1939,HolzingerSwineford1939[school=="Pasteur",])
+Pasteur.x <- Pasteur[grep("x[0-9]",names(Pasteur))]
+```
+
+Let's first have a look at the data from the second school, Grant-White:
+
+```{r}
+GW <- with(HolzingerSwineford1939,HolzingerSwineford1939[school=="Grant-White",])
+GW.x <- GW[grep("x[0-9]",names(GW))]
+describe(GW.x)
+boxplot(GW.x)
+# We can also compare the distributions of the variables with those from the other school:
+boxplot(Pasteur.x)
+```
+
+Actually, the distributions of the variables look amazingly similar. And in the human sciences, when something seems too good to be true, then it most probably is: amazingly clean data raises a suspicion of some kind of wrongdoing. In this case, however, that would be a question for historians to answer!
+
+Anyhow, let's use the *lavaan* package to fit a confirmatory factor model to the data from the Grant-White school and test the three factor model! The command to do so is pretty simple:
+
+```{r}
+cfa.model <- 'visual =~ x1 + x2 + x3
+              textual =~ x4 + x5 + x6
+              speed =~ x7 + x8 + x9'
+cfa.fit <- cfa(cfa.model,data=GW.x)
+summary(cfa.fit, rsq=T, fit.measures=T, standardized=T)
+```
+
+CFI compares the fitted model with the worst possible model, in which no correlations are specified between any of the observed variables (x1-x9). 
+
+RMSEA is about badness-of-model-fit, so lower values mean better model fit. A value of < 0.05 is sometimes considered adequate, while it is also a good idea to check the width of the associated confidence interval. In this case, the confidence interval seems quite wide, so we have less confidence in the population value being < 0.05. 
+
+SRMR is short for standardized root mean square residual, and it's calculated as difference between the observed correlations (i.e. the sample correlation matrix for x1-x9) and the correlations calculated based on the model we are fitting to the data. Sometimes a cut-off limit of < 0.08 is suggested as indicating acceptable model fit, but it's actually more informative to check whether some large residual correlations exist in the data. Let's do that next! Doing so gives us information where the model fits well, and where it has trouble fitting the data. The *residual correlations* among the nine variables are obtained using the command
+
+```{r}
+res.GW <- residuals(cfa.fit,type="cor")
+res.GW
+```
+
+Even though looking at correlation matrices may be helpful when diagnosing the reasons for the lack of model fit, I think humans are equipped with a highly efficient pattern recognition software and it should be used when trying to make sense of complex data. Thus the cool figure:
+
+```{r}
+# Let's first pick only the part of the residuals that we actually need:
+res.GW <- residuals(cfa.fit,type="cor")$cor
+```
+
+```{r warning=FALSE}
+library(qgraph) # We use this package for drawing the figure
+qgraph(res.GW, layout="circle", graph="default")
+```
+
+Based on the residual plot, it would seem that at least in this new sample, variable x9 is positively correlated with the variables x1-x3 after taking the factor structure in the account. So there is perhaps another latent variable that is affecting the correlations. Or perhaps x9 is partly a measurement of visual ability, because it is a visual task in nature (x9 = "speeded discrimination of straight and curved capitals"). 
+
+On the other hand, variable x7 ("Speeded addition") has a negative residual correlation with variables x1-x3. The result is interesting, but its interpretation is a bit involved. In the model, variable x7 had a zero loading on the Visual ability factor. Still, variable x7 is expected to correlate with variables x1-x3 to some extent. This is because the latent factors Visual ability and Speed are allowed to correlate. If their correlation was zero, then also the model-implied correlation between x7 and x1-x3 would be zero. So the negative residual means that x7 correlates with x1-x3 less than it would be expected to. What are we exactly expecting, then, based on the model? The answer can be found by typing
+
+```{r}
+lavInspect(cfa.fit,what="cor.ov")
+```
+
+So the best way to interpret the negative residuals seems to be that variable x7 has less in common with the visual task variables x1-x3 than the other items measuring processing speed. Looking at the names of the variables, an explanation comes to mind: speeded addition seems indeed less a visual task than the other processing speed tasks (which involve counting dots and looking at letters). 
+
+Next, let's turn to an important question in psychometrics: how to judge whether the instrument measures the same thing in different groups of people? This is an especially important question to ask when dealing with a sensitive topic such as measuring intelligence. 
+
+## Measurement equivalence (a.k.a measurement invariance)
+
+The basic question in measurement equivalence testing is: "Do the ability tests measure the same thing in the two schools?" The statistically minded researcher begins to answer the question in parts, fitting a series of more and more constrained models to the data. 
+
+First, it is necessary to find out whether the number of factors is the same in the two samples and whether the items load on the same factors (this can be checked using EFA). If this seems to be the case, the same CFA model can be fitted to the two samples of data simultaneously. If the model fits,  **configural equivalence** has been demonstrated. Model fit is always a matter of degree, but in this case, we can be satisfied with the degree of model fit.  
+
+Second, the equality of factor loadings is assessed. If they are equal, then we can say that the same latent variables have been measured in the groups being compared. The assumption is called that of "weak equivalence" or sometimes "factor loading equivalence". 
+
+Third, item intercepts are compared across the groups. Unstandardized factor loadings are regression coefficients, b1 in the equation y = b0 + b1 + e, with y the observed variable (for instance speeded addition, x7 in the data), and b0 the expected value of the observed variable when the latent property (for instance processing speed) equals zero. If the constants are not equal, then there is something else, a constant number, that is being added to the measurements in one of the schools. An analogy may help: imagine two health centers that weigh people (weight being the latent variable). In one health center, people are weighted with all their clothes on and in one in only their underwear. The weight of the clothes is analogous to a constant being systematically added in one of the measurement models. You can come up with ideas of what sort of a thing the constant might refer to in the context of CFA models. If this assumption is in force, we speak of "strong equivalence" of the models.
+
+Finally, the *e* terms in the regression equations, the amounts of measurement errors, can be compared. This stage is rarely reached in these traditional measurement equivalence models, however. The testing of measurement equivalence is a rapidly developing field, and interesting breakthroughs are being made all the time now. For instance, these models suffer from the usual weakness related to performing statistical tests in large data: everything becomes significant when the sample size increases sufficiently. But the more exciting alternatives are not yet as readily available in software as the measurement equivalence tests are!
+
+So, FINALLY, let's get back to business, and carry out the tests! For that, we use the package semTools:
+
+```{r echo = FALSE, message = FALSE, results = "hide", warning=FALSE}
+library(semTools)
+```
+
+```{r}
+measurementInvariance(cfa.model,data=HolzingerSwineford1939, group="school")
+```
+
+The results show that weak equivalence holds, but strong equivalence doesn't. So we can say that the same things are being measured in the two schools, but the mean scores (factor scores or direct sums / means etc.) should not be directly compared, because there is some other process at play in the two schools affecting the constant terms in the regression equations. Perhaps this could have something to do with response styles in the two schools, or be somehow related to school cultures. 
+
+Whatever causes the difference in the constant terms, we would probably continue the modeling exercise by fitting so-called partial strong equivalence models, in which the constant terms for some items are allowed to differ between the schools. We will not go there at this point, though.
+
+
