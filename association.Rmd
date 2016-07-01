@@ -1,0 +1,110 @@
+---
+title: "Testing for association between two continous variables"
+author: "Esko"
+date: "29.06.2016"
+output: html_document
+---
+
+
+Dataset
+-------------------
+We will load the dataset created in section Merging two data frames, where we had game performance and working memory test
+data. 
+
+```{r}
+game.wmc <- read.table("kr_gamewmc.txt", header=T)
+```
+
+
+Question: Is there association between the accuracy in the game and the working memory capacity?
+--------------------
+
+Calculate the accuracy again:
+```{r}
+game.wmc$accuracy <- game.wmc$Phit + game.wmc$PcorrectRejection
+```
+
+In order to visualize an association between two continous variables, a scatter plot would be perfect. 
+
+```{r}
+plot(game.wmc$pcu_score, game.wmc$accuracy) 
+```
+
+We can also calculate correlation. 
+
+```{r}
+cor(game.wmc$pcu_score, game.wmc$accuracy) 
+```
+But there were two missing values in the working memory test. We can either remove them, or instruct cor function to use only complete observations.
+```{r}
+cor(game.wmc$pcu_score, game.wmc$accuracy, use="complete.obs") 
+```
+With cor.test, it is possible to calculate the significance of the correlation, also. Note that missing values are removed by default.
+```{r}
+cor.test(game.wmc$pcu_score, game.wmc$accuracy)  
+```
+
+We could also use a linear regression to calculate the same thing. 
+
+```{r}
+fm <- lm(accuracy ~ pcu_score, game.wmc)
+summary(fm)
+```
+Function summary is useful for inspecting the model. The fitted model can be also given to plot command, which shows some diagnostic information. 
+```{r}
+plot(fm)
+```
+
+Finally, we could calculate the F-statistics for all the terms using anova function. In this case, F statistics was already available in the summary because the model had only a single term. 
+```{r}
+anova(fm)
+```
+
+Beware of R's anova
+---------------------
+If we have a model with two or more predictors, the anova function is a bit complicated for user accustomed to SPSS.
+
+First, anova uses type I Sum of Squares, so the order matters. That is, terms are evaluated sequentially.
+```{r}
+##################################################################################
+# Before making anovas with R, set the default contrasts to orthogonal, 
+# if want to have results comparable to SPSS. 
+#
+# Especially, if you want to use type III Sum of Squares like in SPSS by default, 
+# you MUST use orthogonal contrasts! Otherwise your results may be wrong. 
+##################################################################################
+options(contrasts = c("contr.sum", "contr.poly")) 
+
+
+# main effect and the interaction
+fm1 <- lm(accuracy ~ pcu_score + age_grp + pcu_score:age_grp, game.wmc) 
+anova(fm1)
+
+# this a shorthand for main effects and interaction
+fm2 <- lm(accuracy ~ pcu_score * age_grp, game.wmc) 
+anova(fm2)
+
+# here the order is different
+fm3 <- lm(accuracy ~ age_grp * pcu_score, game.wmc)
+anova(fm3)
+
+```
+The results with the third model are different from the first and second (which are actually exactly the same models), because of type I Sum of Sqaures.
+
+In order to use type III Sum of Squares, where each term is adjusted for all the terms, it is easiest to use function Anova from package car.
+
+```{r}
+# I repeat this here. Never forget, especially with type=3
+options(contrasts = c("contr.sum", "contr.poly")) 
+
+require(car)
+Anova(fm2, type=3)
+Anova(fm3, type=3)
+```
+
+Btw, do you recognize something funny here? Both main effects are not significant, even thought if tested separately they are? We have actually run into problems with multicollinearity here. Therefore, after controlling for age_grp, there is nothing to explain with pcu_score anymore, and vice versa. This is also the problem with type III Sum of Squares. If you use them blindly, you may get misleading results.
+
+
+
+
+
