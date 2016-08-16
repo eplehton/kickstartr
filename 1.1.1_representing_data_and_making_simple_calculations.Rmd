@@ -1,19 +1,19 @@
 ---
-title: "Representing data and making simple calculations"
+title: "Representing data and performing simple calculations"
 output: html_document
 ---
 
 
-Objects are way to represent data in a programming language like R. For different kinds of data, the computer needs different kind of objects. 
+Objects are a way to represent data in a programming language like R. For different kinds of data, the computer needs different kind of objects. 
 
 Vectors
 ==========================
 
 In R, the basic object is vector. It is an ordered set of data containing one or more elements. 
 
-When you enter text to the R console, the interpreted will parse your input, and create a vector. The vectors "know" what kind of data they have in them.
+When you enter text to the R console, the interpreter will parse your input, and create a vector. The vectors "know" what kind of data they have in them.
 
-[R lang defitions: Vectors](https://cran.r-project.org/doc/manuals/r-release/R-lang.html#Vector-objects)
+[R lang definitions: Vectors](https://cran.r-project.org/doc/manuals/r-release/R-lang.html#Vector-objects)
 
 
 ```{r}
@@ -37,7 +37,7 @@ length(c(7, 6, 3))
 "Vector"
 c("Vector", "says", "hello!")
 
-# beside the type, everything is same as with numbers
+# beside the type, everything is the same as with numbers
 class("Vector")
 class(c("Vector", "says", "hello!"))
 
@@ -49,7 +49,7 @@ length(c("Vector", "says", "hello!"))
 Variables 
 =========================
 
-The power of programming language is on the possibility to describe the algorithm (= what will be computed) regardless of the actual data. For this we need variables, which can represent the actual objects in the algorithm. 
+The power of using programming languages stems from the possibility of describing the *algorithm* (= what will be computed) regardless of what the actual data looks like. The actual data, on its part, is stored in *variables*, which represent the actual objects in the algorithm. 
 
 ```{r}
 
@@ -59,15 +59,15 @@ print(employerCosts)
 
 ```
 
-Here the R console first creates a vector of type numbers with one member (2734.51). Then it is assigned to the variable salaryBeforeTaxes with operator <-. You can thing a variable a box where you can but data. 
+Here the R console first creates a vector of type *numerical*. The vector is of length one, it has only a single member (2734.51). The vector is then assigned to be the value of the variable salaryBeforeTaxes using the arrow operator "<-". You can think of variables as boxes in which you can put data. 
 
 
 Operators
 ===========================
 
-Objects represent data and variables can represent them in algorithms. In the previous example, we used multiplication which was represented as *. * is an operator. When an operator encounters objects (or variables which can represent them), new objects are created. 
+Data is contained in objects; variables represent the data in algorithms. In the previous example, we performed a *multiplication* operiation which was represented using \* as an operator. When an operator encounters objects (or variables which can represent them), new objects are created. 
 
-However, at first there is nothing that exciting if you remember anything about elementary school mathematics. 
+Even though the idea is a bit abstract, the simplest examples of it are familiar already from elementary school mathematics.
 
 [R lang definition: Operators](https://cran.r-project.org/doc/manuals/r-release/R-lang.html#Operators)
 
@@ -83,14 +83,14 @@ a - b
 a * b
 a / b
 
-# NB. Order or calculation follows the ordinary mathematical rules
+# NB. Order of calculation follows the ordinary mathematical rules
 a + b * c    
 (a + b) * c  
 a + (b * c) 
 
 ```
 
-These we are vectors which were of length 1. Everything happens pretty much the same way for vectors which are longer. Everything operator is applied element-wise. 
+These were vectors of length 1. Everything happens pretty much the same way for vectors which are longer. In that case, the operator is applied element-wise. 
 
 ```{r}
 thesisWorker <- 0
@@ -118,8 +118,7 @@ Variables are a way to describe algorithms irrespective of data. Vectors are a v
 Data frames
 ==============================
 
-Most of the time researchers in behavioural sciences are working with data which are nicely arranged to two dimensional datasets. On the rows, there are observations and on columns there are different variables which describe different aspects of these observations. In R, these are called as data frame objects or just data frames. 
-
+Most of the time researchers in behavioural sciences are working with data which are nicely arranged as two dimensional datasets. On the rows, there are observations and on columns there are different variables which describe different aspects of these observations. In R, these are called "data frame objects" or just "data frames". 
 
 Data frames can be constructed by stacking vectors beside each other or on top of each other
 
@@ -163,7 +162,7 @@ View(academics)
 Dots . in the variable or function names
 ----------------------------------------
 
-In the previous example, we saved the data frame with a variable name which had an ending ".df". It is good to notice that there is nothing magical here. It is just a part of the variable name, and we could have used any other valid variables name. Unlike to many other programming languages like Python, Java or MATLAB, dot (.) is not used for accessing object/struct members. R uses $-symbol for that purpose. 
+In the previous example, we saved the data frame with a variable name which had an ending ".df". It is good to notice that there is nothing magical here. It is just a part of the variable name, and we could have used any other valid variables name. Unlike many other programming languages such as Python, Java or MATLAB, dot (.) is not used for accessing object/struct members. R uses $-symbol for that purpose. 
 
 
 
@@ -200,7 +199,7 @@ academics.cryptic <- academics # make a copy of the data frame first
 names(academics.cryptic)
 
 # Use short cryptic variable names and you will be viewed as
-# - super-intelligent bt all non-programmers 
+# - super-intelligent by all non-programmers 
 # - super-stupid by all who know how to program
 names(academics.cryptic) <- c("pos", "slr", "cit", "wyr")   
 # Remember that your scripts are the best (and typically only) documentation
@@ -212,7 +211,7 @@ names(academics.cryptic)
 Creating new variables to data frames 
 ----------------------------------------------------
 
-Often we need to calculate something from the existing variables in the data frame and then include them to the data frame. 
+Often we need to calculate something based ont the existing variables in the data frame and then include the result in the data frame. 
 ```{r}
 academics$costs <- academics$salaryBeforeTaxes * 1.56
 
@@ -225,13 +224,13 @@ academics
 It does not matter if the variable is already present in the data frame or not. 
 
 ```{r}
-# Budjet defiency solved!
+# Budjet deficits solved!
 academics$salaryBeforeTaxes
 academics$salaryBeforeTaxes <- academics$salaryBeforeTaxes * 0.80
 academics$salaryBeforeTaxes
 
-# Here how the order of commands work here. On the right side of <- old values are used 
-# to calcuate new reduced values. Then those values are assigned back to the data frame
+# Here's how the commands work. On the right side of of the arrow, old values are used 
+# to calculate the new values. Then those values are assigned back to the data frame
 # using the same variable names. The orginal values are lost.
 
 # costs variable was calculated by multiplying salaryBeforeTaxes by 1.56.
@@ -241,7 +240,7 @@ academics$new_costs <- academics$salaryBeforeTaxes * 1.56
 academics
 ```
 
-If we made a mistake in creating the new variable, we can "cancel" creating it by assigining NULL to it.  
+If we made a mistake in creating the new variable, we can "cancel" creating it by assigining NULL to it. This removes the newly created variable from the data frame.
 
 ```{r}
 academics$citatonsPerCitations <- academics$citations / academics$citations
@@ -256,7 +255,7 @@ academics
 
 
 
-There are also other ways for that
+There are also other ways to create new variables and incude them in the data frame:
 
 ```{r}
 academics$citationsPerYear <- NULL
@@ -275,7 +274,7 @@ Creating values conditionally
 Sometimes it's necessary to create new variables conditionally, conditioned on the values of
 other variables
 
-For instance, we could be interested to calculate a new variables which describes weather a person has citations or not:
+For instance, we could be interested to calculate a new variable which describes whether a person has citations or not:
 
 ```{r}
 academics$hasCitations <- ifelse(academics$citations > 0, 1 ,0)
@@ -289,7 +288,7 @@ academics
 Comparative operators 
 --------------------------------
 
-In the above, we used comparator operator >. They can be used to compare things, and the results will be either TRUE or FALSE. 
+In the above, we used the comparator operator >. They can be used to compare things, and the results will be either TRUE or FALSE. 
 
 [Operators](https://cran.r-project.org/doc/manuals/r-release/R-lang.html#Operators)
 
@@ -310,8 +309,7 @@ In the above, we used comparator operator >. They can be used to compare things,
 Attach and detach
 -----------------------
 
-First I will clear the previously created variables 
-so that we do not get confused (as the lecturer did...). 
+First I will clear the previously created variables so that we do not get confused. 
 
 ```{r}
 rm(position)
@@ -319,7 +317,7 @@ rm(salaryBeforeTaxes)
 rm(citations)
 rm(workingYears)
 ```
-Try to use those variable! There not here anymore after removing them. However, the data they contained is still part of the data frame academics which was created. And those data frames do have those variables left, because they are part of the the data frame. 
+Try to use those variables! They are not there anymore after removing them. However, the data they contained is still part of the data frame academics which was created. And those data frames do have those variables left, because they are part of the the data frame. 
 ```{r}
 academics$position
 ```
@@ -338,17 +336,16 @@ detach(academics)
 
 With
 -----------------------
-Sometimes it can be easier to use with. It defines the data frame where to look up the variables, but it does not alter the data frame by default. 
+Sometimes it can be easier to use the command "with". The idea of "with" is that it defines the data frame from which to look for the variables, but it does not alter the data frame by default. 
 
 ```{r}
-
 
 citationsPerYear <- with(academics.cryptic, cit / wyr)
 # citations per year is not added to academics
 academics.cryptic
 
 # If you want to add it, write like this:
-academics.cryptic$cpt <- with(academics.cryptic, cit / wyr)
+academics.cryptic$cpy <- with(academics.cryptic, cit / wyr)
 academics.cryptic
 ```
 
@@ -389,7 +386,7 @@ academics
 Matrices
 ===============================
 
-Data frames are 2 x 2 tables, variables always on columns and cases on rows. It is good to know, that there is also another way to represent tabular data using matrices. Matrices are R's equivalent to matrices in linear algebra, and they "know" how to become in matrix like fashion with some of the operators. 
+Data frames are 2 x 2 tables, variables always on columns and cases on rows. It is good to know that there is also another way to represent tabular data using matrices. Matrices are R's equivalent to matrices in linear algebra, and they "know" how to become in matrix like fashion with some of the operators. 
 
 
 ```{r}
@@ -421,10 +418,6 @@ kekkone.df
 ```
 
 
-
-
-```
-
 If the values in the vectors were the values of ten different values, we could say:
 
 ```{r}
@@ -455,4 +448,16 @@ as.matrix(kekkone.df)
 
 ```
 
+A simple statistical test: the t-test
+======================================
 
+Let's begin by creating a new data frame of academics who are a bit more well-off than the ones we have so far worked with. 
+
+```{r}
+academics.aalto <- academics
+academics.aalto$salaryBeforeTaxes <- c(2500,3000,3800,5000,12000,50000)
+
+t.test(academics$salaryBeforeTaxes,academics.aalto$salaryBeforeTaxes,paired = F,var.equal = F)
+```
+
+Due to the small sample size, the differences which seem obvious are nonetheless not statistically significant. As you can see, we entered two *vectors* into the t.test function. You can see, by looking at the t-test manual (accessed by typing "?t.test"), the function wants to have (two) vector(s) of data value(s) as input. The function can do different types of t-tests depending on the arguments it receives: for instance, a one-sample t-test would be calculated if only a single vector was given as an input. The other options are similarly described in the documentation of the function. Can you find the descriptions for "paired" and "var.equal"?
