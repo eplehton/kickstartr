@@ -13,8 +13,8 @@ We will use a subset of data from an experiment, where a group of children and a
 
 In the game, the participants watched video clips filmed from the perspective of bicyclists. Their task was to keep an eye on the other road users. In each video clip, the video was suddenly masked and 2-4 circles were drawn on the masked screen. The players' task was to select all the circles containing a road user at the moment when the video was masked (see Figures below). 
 
-![Participants watched videos and their task was to pay attention to other road users](peli_video.png)
-![Suddenly the video was masked and the players' task was to select the locations where was a road user at the momennt when the video was masked](peli_peitetty.png)
+Participants watched videos and their task was to pay attention to other road users](peli_video.png)
+Suddenly the video was masked and the players' task was to select the locations where was a road user at the momennt when the video was masked](peli_peitetty.png)
 
 The dataset contains the following variables:
 - player_id : participant id
