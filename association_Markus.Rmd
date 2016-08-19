@@ -80,14 +80,17 @@ options(contrasts = c("contr.sum", "contr.poly"))
 
 # main effect and the interaction
 fm1 <- lm(accuracy ~ pcu_score + age_grp + pcu_score:age_grp, game.wmc) 
+summary(fm1)
 anova(fm1)
 
 # this a shorthand for main effects and interaction
 fm2 <- lm(accuracy ~ pcu_score * age_grp, game.wmc) 
+summary(fm2)
 anova(fm2)
 
 # here the order is different
 fm3 <- lm(accuracy ~ age_grp * pcu_score, game.wmc)
+summary(fm3)
 anova(fm3)
 
 ```

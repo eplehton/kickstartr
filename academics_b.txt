@@ -1,0 +1,7 @@
+"position","salaryBeforeTaxes","citations","workingYears","citationsPerYear","valid"
+"1","Thesis worker",0,0,0,NA,0
+"2","Research assistant",1700,1,1,1,1
+"3","Doctoral student",2200,8,3,2.66666666666667,1
+"4","Postdoc",3200,30,8,3.75,1
+"5","Professor",5500,7784,20,389.2,1
+"6","Rector",25000,2021,30,67.3666666666667,1

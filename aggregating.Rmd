@@ -18,12 +18,13 @@ head(game.raw)
 The variables in the dataset are the following:
 - player_id : the participant id
 - age_grp: A = adult participant, C = child participant
+- gender ; Nainen = female, Mies = male
 - clip_id : Specifies the video clip watched. There was 30 clips in random order.
 - video_id : video_id tells the position of the video watched in the sequence. Values range from 0 (the first) to 29 (the last).
 - location_id : Identifies the locations presented for the clip. Remember, the task is to select those locations where was a road user at the time when the video was masked
 - correctRejection, falseAlarm, miss, hit : TRUE or FALSE depending on the answer and location. 
 
-Question: How to calculate the proportion fo hits, misses etc.
+Question: How to calculate the proportion of hits, misses etc.
 -----------------------------------------------------------------
 
 We had values Phit, Pmiss, PfalseAlarm, PcorrectRejection etc. which we used in the calculations. Basically, each of there represent the proportion of TRUEs in the variable among all the answers for each participant.

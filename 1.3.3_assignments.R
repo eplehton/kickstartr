@@ -4,7 +4,8 @@
 
 #####
 # 1) Load dataset sleep from the R dataset repository using command data(sleep).
-#    Get accustomed to the data. 
+#    Get accustomed to the data. What are the variables? What do they represent?
+
 
 #####
 # 2) Create different kinds of plots, using both boxplot and ggplot2, to describe the
@@ -23,24 +24,27 @@
 # the extra hours for drug 2 are on the y-axis. 
 
 
-###
-# 6) Load again the situation awareness data. Include the information about the set. 
+####
+# 6) Load the game data from file kr_gameraw.txt. 
 #
-# The design of the experiment was switching replications. Half of the participants 
-# had an intervention between sets 1 and 2, and half between sets 2 and 3, 
-#
-# Therefore, we should have a significant interaction of variables set and test_order, if
-# the intervention had any effect. 
-#
-# First, make a plot of the interaction using ggplot2. 
+# Calculate the accuracy of responses for each participant. See the lecture notes (rmANOVA.html) 
+# how to calculate it. 
 
+####
+# 7) Make a plot which describes the level of accuracy by age group and gender. 
+# Run ANOVA 2 x 2 to investigate if there are differences in accuracy as a function of age group or gender, 
+# weather there is interaction of age group and gender?
 
+####
+# 8) In the lecture notes the game was divided to three sets, and then we investigated the learning 
+# over the game. Perform a repeates measures ANOVA to investigate if the gender have 
+# any significant effect on learning. This means that you need to investigate the interaction
+# of set and gender. 
 
-# 7) Perform repeated measures ANOVA to test the interaction. This can be performed using 
-# function ezANOVA from package ez. 
-
-# 8) Refresh you memories from previous stat courses. Is everything right the repeaated 
-# measures ANOVA? Are we breaking any assumptions?
+####
+# 9) Refresh your memories from previous statistics courses. 
+# Is everything right the repeated measures ANOVA you just performed? 
+# Are we breaking any assumptions?
 
 
 

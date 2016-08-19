@@ -1,0 +1,146 @@
+
+
+Boxplot
+--------------------
+
+However, instead of the table, I typically prefer to plot the data graphically. For example, it would be possible to use function boxplot. This function was two ways to use it, the way is selected based on the first parameter given. If you give is a data frame, it makes a boxplot out of all the variables, which is not very informative here, because the variables are not on the same scale -- some of them are even factors. When given a single variable, the results is a boxplot over all the values.
+
+```{r}
+boxplot(corrects)
+boxplot(corrects$correct.mean)
+
+```
+
+The most useful way to use boxplot here is to give a formula as the first parameter.  
+
+```{r}
+boxplot(correct.mean ~ age_grp, corrects)
+```
+
+
+The formulas are given with tilde ~. The variable on the left of the tilde is the variable to be boxplotted, and the variable on the right is the grouping variable. 
+
+t-test
+-------------------------
+
+Using the same idea, it would also easy to make between groups t-test. 
+
+```{r}
+t.test(correct.mean ~ age_grp, corrects)
+
+```
+
+
+Merging two data files
+============================
+
+But is there any difference between males and females? In order to make a similar comparision, we need to some how merge the satest performance data and the background data. This happens with function merge. 
+
+```{r}
+
+satest.merged <- merge(satest, satest.bg, by="player_id")
+```
+
+That was easy! If you have never done this with SPSS, give it a try... 
+
+Now we can do the same as previous with this merged data. 
+
+```{r}
+corrects <- ddply(satest.merged, .(age_grp, sex, player_id), summarize,
+      correct.mean = mean(correct))
+
+corrects
+
+correct.desc <- ddply(corrects, .(age_grp, sex), summarize, 
+                      M = mean(correct.mean),
+                      SD = sd(correct.mean),
+                      N = length(correct.mean))
+
+correct.desc
+```
+
+2 x 2 boxplot
+==========================================
+
+In boxplot, we can make an informative boxplot at least in three ways.
+```{r}
+boxplot(correct.mean ~ age_grp, corrects)
+boxplot(correct.mean ~ sex, corrects)
+boxplot(correct.mean ~ age_grp + sex, corrects)
+```
+
+t.test between males and females. 
+```{r}
+t.test(correct.mean ~ sex, corrects)
+```
+
+
+Analysis of variance
+====================================
+
+Based on the boxplots, the interaction of age group and sex seems unlikely, but we could also test it. This cannot be tested with a t-test. We need analysis of variance. 
+
+The analysis of variance is a special case of linear model. Therefore, we can use the function lm to first fit a linear model. 
+```{r}
+
+fm <- lm(correct.mean ~ age_grp * sex, corrects)
+
+```
+
+age_grp * sex means that we want to include both the main effects and the interacion of the age_grp and sex to the model. 
+
+Three functions are needed for inspecting the model. 
+
+```{r}
+
+summary(fm)
+anova(fm)
+
+summary(fm)
+```
+
+Unfortunately, even the analysis of variance is more complex than you would assume based on clicking with SPSS, and R does not try to hide it from the users. 
+
+There are multiple ways to calculate the Sums of Squares, which affect the F-values. The way above, uses type I of Sum of Squares. It is not wrong, but in some cases it may produce different results than SPSS/SAS, which uses by default type III of Sum of Squares. 
+
+The easiest way to overcome this problem is to use a package ez. A package, again!
+
+There we have quite user friendly function ezANOVA.  
+```{r}
+
+require(ez)
+
+fm.ez <- ezANOVA(corrects, 
+        dv=correct.mean,
+        wid=player_id,
+        between = .(age_grp, sex))
+```
+We got a friendly warning that our data is unbalanced, and therefore different Sum of Squares may produce different results. 
+
+```{r}
+fm.ez.ss1 <- ezANOVA(corrects, 
+        dv=correct.mean,
+        wid=player_id,
+        between = .(age_grp, sex),
+        type=1)
+fm.ez.ss2 <- ezANOVA(corrects, 
+        dv=correct.mean,
+        wid=player_id,
+        between = .(age_grp, sex),
+        type=2)
+fm.ez.ss3 <- ezANOVA(corrects, 
+        dv=correct.mean,
+        wid=player_id,
+        between = .(age_grp, sex),
+        type=3)
+```
+
+As we can see, the results are slightly different depending on the choice of SS type. 
+```{r}
+fm.ez.ss1
+fm.ez.ss2
+fm.ez.ss3
+```
+
+Read more about the problems with unequal variance: http://onlinestatbook.com/2/analysis_of_variance/unequal.html
+
