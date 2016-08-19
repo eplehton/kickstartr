@@ -1,0 +1,119 @@
+---
+title: "EFA in R"
+author: "MM"
+date: "08.07.2016"
+output: html_document
+---
+
+Let's find out how to do exploratory factor analysis (EFA) using R! In case someone needs a refresher, EFA is a technique related to psychological measurement. Because latent variables (factors), such as intelligence or extraversion, cannot be directly observed, they are measured using tests or questionnaires. If subtests or individual question items form groups that are highly correlated with each other, and less correlated with the other subtests / items, then we infer that their correlations are caused by an unobserved variable having an effect on all of them. The idea can perhaps be demonstrated by the picture by Kimmo Vehkalahti:
+
+![](mittausmalli.gif)
+
+
+Let's use the HolzingerSwineford1939 data set from the lavaan package whose correlational structure we examined previously:
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+library(lavaan)
+library(psych)
+library(semPlot)
+library(ggplot2)
+library(reshape2)
+```
+
+```{r}
+Pasteur <- with(HolzingerSwineford1939,HolzingerSwineford1939[school=="Pasteur",])
+Pasteur.x <- Pasteur[grep("x[0-9]",names(Pasteur))] # I demonstrate using command "grep" in here, even though it's by no means necessary. grep is a command for finding text strings, a little bit like typing "Ctrl+F" in a text processor. Inside the square brackets we have grep("x[0-9]", names(Pasteur).  Here we use grep to find all text strings that contain the character "x" followed by any number from zero to nine. It searches for these text strings in the variable names of our new dataset "Pasteur". Then, the Pasteur data set is indexed using the results of grep: Pasteur[grep("x[0-9]",names(Pasteur))]. We would get the same result by saying simply: Pasteur[7:15]
+
+```
+
+Let's see what factor analysis says about the data. There are many functions for factor analysis in R.
+Base R has factanal, in which only Maximum Likelihood estimation is available. We'll use the function *fa* from the package *psych*
+
+Let's first run parallel analysis (PA) to have an idea of the number of factors to extract. And actually, even before that, a small detour for you to understand PA better. You may be familiar with the eigenvalue-greater-than-one criterion for the number of factors.
+
+PA is related to that idea, replacing the threshold of eigenvalue = 1 with that obtained from calculating eigenvalues from independent normal variables, i.e. random data. Doing so accounts for sampling variation: even if on the population level the variables are really uncorrelated, slight correlations may emerge due to sampling variation.
+
+### Detour: eigenvalues
+
+Let's demonstrate the idea by creating independent identically distributed (iid) normal variables and calculating the eigenvalues of their correlation matrix:
+
+```{r}
+normals <- matrix( rnorm(20*10,mean=0,sd=1), 20, 10)
+
+# So the eigenvalues are:
+
+eigen(cor(normals))
+
+# And the largest eigenvalue
+
+max(eigen(cor(normals))$values)
+```
+
+The largest of which are clearly above 1!
+
+[On eigenvalues, a beautiful demo: ](http://setosa.io/ev/eigenvectors-and-eigenvalues/)
+
+Anyhow, in a covariance matrix, the eigenvalues signify the amount of variance along dimensions of 1) largest spread in the data 2) second largest spread in the data, etc, [nicely demonstrated here:](http://www.visiondummy.com/2014/04/geometric-interpretation-covariance-matrix/)
+
+So, parallel analysis tells you whether there is more variance in your data, along the dimensions of largest variance, than in comparable random data
+
+## Parallel analysis:
+
+```{r}
+fa.parallel(Pasteur.x)
+```
+
+So we'll try factor analysis with three factors (so far with no factor rotation):
+
+```{r}
+fa.Pasteur <- fa(Pasteur.x,nfactors = 3,rotate = "none")
+fa.Pasteur
+```
+
+On the first line of the output, we see that the function carries out minres factor analysis (i.e. ordinary least squares as estimation method, trying to minimize the residual correlation between the variables)
+
+We can do principal axis factoring by saying:
+
+```{r}
+fa.Pasteur <- fa(Pasteur.x,nfactors = 3,rotate = "none",fm="pa")
+fa.Pasteur
+```
+
+In the output, h2 is the communality (how much variation in the variable is due to the factors), u2 the uniqueness. So we can see that in some variables, more than 50 % variance is explained by the factor solution, while in variable x2 only 26 % is.
+
+Let's try with an oblique rotation (oblimin):
+
+```{r}
+fa.Pasteur <- fa(Pasteur.x,nfactors = 3,rotate = "oblimin",fm="pa")
+print(fa.Pasteur, sort=TRUE)
+```
+
+Seems like we have a good, simple structure, with items grouped as x1,x2,x3; x4,x5,x6; x7,x8,x9. 
+x1 and x9 have a crossloading on another factor perhaps worth noting. The factors can be named by checking what's in the variables. These can be found by saying, again, ?HolzingerSwineford1939. x1-x3 seem to be related to visual processing, so we'll name the factor "Visual ability", x4-x6 have something to do with language processing, so we'll name that one "Textual ability", and the remaining three all require fast information processing, so we'll call that one "Processing speed". The factors seem moderately correlated, so perhaps it's a good idea to indeed use the oblique rotation - or to do bifactor analysis, with a separate general factor (g-factor).
+
+Further, in the previous output, the last column, "com", is the complexity score, i.e. the number of non-zero loadings of the item on the factors. Low scores correspond with a simple factor structure, which is something we are usually looking for.
+
+You can also examine the solution by calling plot on the factor analysis solution:
+```{r}
+plot(fa.Pasteur)
+```
+
+
+And a factor loading diagram can be obtained by:
+
+```{r}
+fa.diagram(fa.Pasteur,cut = 0.01)
+```
+
+The structure matrix (correlations between the factors and variables) resides in:
+
+```{r}
+fa.Pasteur$Structure
+```
+
+There is also a procedure called the Schmid-Leiman transformation, which estimates the effect of a general factor (g-factor) together with the original factors - nicely implemented in the psych package:
+
+```{r}
+schmid(cor(Pasteur.x),nfactors = 3,fm = "pa")
+```
