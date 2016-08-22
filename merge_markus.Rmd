@@ -1,7 +1,7 @@
 ---
 title: "merge"
 author: "Esko & Markus"
-date: "18.08.2016"
+date: "22.08.2016"
 output: html_document
 ---
 
@@ -35,7 +35,7 @@ game.wmc <- merge(game, wmc, by="player_id")
 head(game.wmc)
 ```
 
-That was easy. I have named the new data frame "game.wmc"", but any other name like gamewmc, would have been fine.
+That was easy. I have named the new data frame "game.wmc"", but any other name like gamewmc, would have been fine, also.
 
 ```{r}
 write.table(game.wmc, "kr_gamewmc.txt", row.names=F)

@@ -7,7 +7,7 @@ output: html_document
   
 In the previous example, we compared the performance of children and adults in the learning game and also investigated the association between the game performance and the working memory test. We had a neatly formatted data, where each participant formed a case and a couple of variables summarized the participant's performance. 
 
-However, this is not the original data we collected. The original data was is a completely different format. I used a script written in R to transform it to an intermediate format, where each answer format a case in the dataset. This data is available in file XXXX.
+However, this is not the original data we collected. The original data was is a completely different format. I used a script written in R to transform it to an intermediate format, where each answer format a case in the dataset. This data is available in file kr_gameraw.txt.
 
 ```{r}
 
@@ -112,7 +112,7 @@ Here adding age_grp variable to the grouping factors does not affect the Phit va
 
 Now we can actually calculate the dataset we previously used by adding more calculations.
 ```{r}
-params <- ddply(game.raw, .(age_grp, player_id), summarise,
+params <- ddply(game.raw, .(age_grp, gender, player_id), summarise,
                   Phit = mean(hit),
                   Pmiss = mean(miss),
                   PfalseAlarm = mean(falseAlarm),
